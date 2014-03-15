@@ -1,0 +1,29 @@
+{
+	"type" : "notification",
+	"subtype" : "end",
+	"params" : {
+		"players" : [
+			{ 
+				"nick" : "usuario1",
+				"words" : [
+					{ "word" : "latin", "already_discovered" : false },
+					{ "word" : "sola", "already_discovered" : true }
+				],
+				"score" : 15
+			},
+			{
+				"nick" : "usuario2",
+				"words" : [
+				],
+				"score" : 0
+			},
+			{ 
+				"nick" : "usuario3",
+				"words" : [
+					{ "word" : "peral", "already_discovered" : false }
+				],
+				"score" : 10
+			}
+		]
+	}
+}

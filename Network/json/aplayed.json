@@ -1,0 +1,9 @@
+{
+	"type" : "notification",
+	"subtype" : "played",
+	"params" : {
+		"nick" : "usuario",
+		"letter_count" : 5,
+		"already_discovered" : false
+	}
+}
