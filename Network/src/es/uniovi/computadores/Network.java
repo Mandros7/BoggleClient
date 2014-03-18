@@ -41,7 +41,7 @@ public class Network {
 
 	/**
 	 * Cierra la red. Los hilos que estén bloquedos enviando o recibiendo
-	 * mensajes de la red recibiran una excepción de tipo InterruptedException.
+	 * mensajes de la red recibirán una excepción de tipo InterruptedException.
 	 * 
 	 * @throws IllegalStateException
 	 *             si la red ya está cerrada.
