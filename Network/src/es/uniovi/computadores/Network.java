@@ -6,8 +6,6 @@ import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Logger;
 
-import junit.framework.TestResult;
-
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
