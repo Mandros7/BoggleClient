@@ -6,8 +6,6 @@ import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Logger;
 
-import junit.framework.TestResult;
-
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -41,7 +39,7 @@ public class Network {
 
 	/**
 	 * Cierra la red. Los hilos que estén bloquedos enviando o recibiendo
-	 * mensajes de la red recibiran una excepción de tipo InterruptedException.
+	 * mensajes de la red recibirán una excepción de tipo InterruptedException.
 	 * 
 	 * @throws IllegalStateException
 	 *             si la red ya está cerrada.
