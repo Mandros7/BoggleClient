@@ -9,9 +9,9 @@ import es.uniovi.computadores.mensajes.*;
 
 public class Client {
 	
-	private class NetOutput extends Thread{
+	private class UserOutput extends Thread{
         Network red;
-        NetOutput(Network net){
+        UserOutput(Network net){
             this.red = net;
         }
         public void run() { 
@@ -55,9 +55,9 @@ public class Client {
         }
 } 
 
-	private class NetInput extends Thread{
+	private class UserInput extends Thread{
 		Network red;
-		NetInput(Network net){
+		UserInput(Network net){
 			this.red = net;
 		}
 		public void run() {
@@ -127,8 +127,8 @@ public class Client {
 	}
 	public Client(Network red) throws InterruptedException {
 		System.out.println("Funcionando");
-		NetInput inputThread = new NetInput(red);
-	    NetOutput outputThread = new NetOutput(red);
+		UserInput inputThread = new UserInput(red);
+	    UserOutput outputThread = new UserOutput(red);
 	    inputThread.start();
 	    outputThread.start();
 	    inputThread.join();
