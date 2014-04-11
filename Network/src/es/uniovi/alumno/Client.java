@@ -1,5 +1,7 @@
 package es.uniovi.alumno;
 import java.io.*;
+//import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -9,66 +11,138 @@ import es.uniovi.computadores.mensajes.*;
 
 public class Client {
 	
-	private class UserOutput extends Thread{
-        Network red;
-        UserOutput(Network net){
-            this.red = net;
+	private class UserInput extends Thread{
+		// Hilo de entrada por teclado del usuario
+		ArrayBlockingQueue<Message> OutBuf;
+		String entrada;
+		UserInput(ArrayBlockingQueue<Message> abq){
+			this.OutBuf = abq;
         }
+		
         public void run() { 
-            System.out.println("NetOutput Funcionando");
             boolean started=false;
             while (true){
-                BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-                try {
-                    String s = bufferRead.readLine();
-                    System.out.println(s);
-                    String [] datos = s.split(" ");
-                    switch (datos[0]) {
-                        case ("/START"):
-                            STARTCommandMessage start = new STARTCommandMessage();
-                            red.send(start.toJSON().toString().getBytes());
-                            started = true;
-                        case ("/WORD"):
-                            if (started){
-                                if (datos.length<2){
-                                    System.out.println("Introduce una palabra como segundo argumento.");
-                                }
-                                else{
-                                WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[1]));
-                                red.send(word.toJSON().toString().getBytes());
-                                }
-                            }
-                            else {
-                                System.out.println("La partida aun no se ha iniciado.");
-                                break;
-                            }
-                        default:
-                            break;
+            	InputStreamReader isr = new InputStreamReader(System.in);
+    			BufferedReader br = new BufferedReader(isr);
+    				try {
+						entrada = br.readLine();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+                    System.out.println(entrada);
+                    if (entrada.length()>2){
+	                    String [] datos = entrada.split(" ");
+	                    if (entrada.charAt(0)=='/'){
+		                    switch (datos[0]) {
+		                        case ("/START"):
+		                            STARTCommandMessage start = new STARTCommandMessage();
+		                        	started = true;
+								try {
+									OutBuf.put(start);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+		                        default:
+		                            break;
+		                    }
+	               
+	                    }
+	                    else{
+	                    	if (started){
+	                            WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[0]));
+	                            try {
+									OutBuf.put(word);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+	                    	}
+	                    	else {
+	                            System.out.println("La partida aun no se ha iniciado.");
+	                        }
+	                    }
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
+           } 
         }
-} 
+	}
 
-	private class UserInput extends Thread{
+	private class NetOutput extends Thread {
+		// Hilo de salida de datos hacia la red
 		Network red;
-		UserInput(Network net){
-			this.red = net;
+		ArrayBlockingQueue<Message> OutBuf;
+		Message msg;
+		
+		NetOutput(Network n, ArrayBlockingQueue<Message> abq){
+			this.red = n;
+			this.OutBuf = abq;
+		}
+		
+		public void run(){
+			
+			while (true) {
+				
+				//Se extrae el objeto Comando del buffer circular
+				try {
+					msg = OutBuf.take();
+					red.send(msg.toJSON().toString().getBytes());
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	private class NetInput extends Thread {
+		// Hilo de entrada de datos desde la red
+		Network red;
+		byte[] BytesRed;
+		String StringRed;
+		ArrayBlockingQueue<Message> InBuf;
+		
+		NetInput(Network n, ArrayBlockingQueue<Message> abq){
+			this.red = n;
+			this.InBuf = abq;
+		}
+		
+		public void run(){
+			
+			while (true) {
+				
+				try {
+					//Se espera a recibir una cadena de byte enviados del servidor
+					BytesRed = red.recv();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				//Se crea un objeto Message, que nos servir� para identificar el tipo de respuesta que nos ha enviado
+				//el servidor
+				StringRed = new String(BytesRed);
+				JSONObject json = (JSONObject) JSONValue.parse(StringRed);
+				Message msg = Message.createFromJSON(json);
+				try {
+					InBuf.put(msg);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+	}
+	
+	private class UserOutput extends Thread{
+		// Hilo de salida de datos por pantalla
+		ArrayBlockingQueue<Message> InBuf;
+		UserOutput(ArrayBlockingQueue<Message> InBuf){
+			this.InBuf = InBuf;
 		}
 		public void run() {
-			
-			String textMsg = "";
 			while (true){
 				try {
-					byte [] bytes = red.recv();
-					textMsg = new String(bytes);
-					JSONObject json = (JSONObject) JSONValue.parse(textMsg);
-					Message msg = Message.createFromJSON(json);
+					//byte [] bytes = red.recv();
+					//textMsg = new String(bytes);
+					//JSONObject json = (JSONObject) JSONValue.parse(textMsg);
+					//Message msg = Message.createFromJSON(json);
+					Message msg = InBuf.take();
 					if (msg instanceof NotificationMessage) {
 						if (msg instanceof ASTARTNotificationMessage){
 							System.out.println("Se ha iniciado la partida");
@@ -127,13 +201,26 @@ public class Client {
 	}
 	public Client(Network red) throws InterruptedException {
 		System.out.println("Funcionando");
-		UserInput inputThread = new UserInput(red);
-	    UserOutput outputThread = new UserOutput(red);
-	    inputThread.start();
-	    outputThread.start();
-	    inputThread.join();
-	    outputThread.join(); 
+		ArrayBlockingQueue<Message> OutBuff = new ArrayBlockingQueue<Message>(10);
+		ArrayBlockingQueue<Message>	InBuff = new ArrayBlockingQueue<Message>(10);
+		UserOutput salidaUsuario = new UserOutput(InBuff);
+		NetOutput salidaRed = new NetOutput(red,OutBuff);
+	    UserInput entradaUsuario = new UserInput(OutBuff);
+	    NetInput entradaRed = new NetInput(red, InBuff);
+	    salidaUsuario.start();
+	    entradaUsuario.start();
+	    salidaRed.start();
+	    entradaRed.start();
+	    entradaRed.join();
+	    salidaRed.join();
+	    salidaUsuario.join();
+	    entradaUsuario.join(); 
 		red.close();
+	}
+	
+	public static void main(String[] args) throws InterruptedException {
+		Network red = new Network();
+		Client cli = new Client(red);
 	}
 
 	
