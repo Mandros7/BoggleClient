@@ -171,6 +171,16 @@ public class Client {
 								System.out.println("El jugador "+nick+" ha encontrado una palabra de "+length+" letras que ya habia sido descubierta.");
 							}
 						}
+						if (msg instanceof AENDNotificationMessage) {
+							int i = 0;
+							while (i<((AENDNotificationMessage)msg).getPlayers().size()) {
+								System.out.println("El jugador " +
+										((AENDNotificationMessage)msg).getPlayers().get(i).getNick() +
+											" ha obtenido una puntuación de " +
+											((AENDNotificationMessage)msg).getPlayers().get(i).getScore() + " puntos");
+								i++;
+							}
+						}
 					}
 					if (msg instanceof ResponseMessage){
 						if (((ResponseMessage) msg).isError()){
