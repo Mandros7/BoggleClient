@@ -35,6 +35,7 @@ public class Client {
 						e.printStackTrace();
 					}
                     System.out.println(entrada);
+                    entrada = entrada.toUpperCase();
                     if (entrada.length()>2){
 	                    String [] datos = entrada.split(" ");
 	                    if (entrada.charAt(0)=='/'){
