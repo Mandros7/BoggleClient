@@ -45,5 +45,15 @@ public class WordStats {
 
 	public boolean isAlreadyDiscovered() {
 		return mAlreadyDiscovered;
-	}	
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(mWord);
+		if (mAlreadyDiscovered) {
+			builder.append(" (repetida)");
+		}
+		return builder.toString();
+	}
 }
