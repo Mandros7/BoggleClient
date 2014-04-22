@@ -40,8 +40,8 @@ public class Client {
 	                    String [] datos = entrada.split(" ");
 	                    if (entrada.charAt(0)=='/'){
 		                    switch (datos[0]) {
-		                        case ("/START"):
-		                      
+		                    
+		                        case ("/START"):		                   
 		                            STARTCommandMessage start = new STARTCommandMessage();
 		                        	started = true;
 									try {
@@ -50,9 +50,11 @@ public class Client {
 										e.printStackTrace();
 									}
 									break;
+									
 		                        case ("/QUIT"):
 		                        	funcionando=false;
 		                        	break;
+
 		                        case ("/WORD"):
 		                        	if (started){
 			                            WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[1]));
@@ -141,7 +143,7 @@ public class Client {
 					//e.printStackTrace();
 				}
 				
-				//Se crea un objeto Message, que nos servir��� para identificar el tipo de respuesta que nos ha enviado
+				//Se crea un objeto Message, que nos servir��������� para identificar el tipo de respuesta que nos ha enviado
 				//el servidor
 				StringRed = new String(BytesRed);
 				JSONObject json = (JSONObject) JSONValue.parse(StringRed);
@@ -205,7 +207,7 @@ public class Client {
 							while (i<((AENDNotificationMessage)msg).getPlayers().size()) {
 								System.out.println("El jugador " +
 										((AENDNotificationMessage)msg).getPlayers().get(i).getNick() +
-											" ha obtenido una puntuaci�n de " +
+											" ha obtenido una puntuaci���n de " +
 											((AENDNotificationMessage)msg).getPlayers().get(i).getScore() + " puntos");
 								i++;
 							}

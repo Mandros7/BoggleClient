@@ -6,7 +6,7 @@ public class LISTCommandMessage extends CommandMessage{
 	
 	public static final String SUBTYPE = "list";
 
-		protected LISTCommandMessage() {
+		public LISTCommandMessage() {
 		super(SUBTYPE);
 	}
 
