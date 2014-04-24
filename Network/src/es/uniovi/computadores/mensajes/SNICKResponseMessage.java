@@ -25,7 +25,7 @@ public class SNICKResponseMessage extends ResponseMessage{
 		parseParams(params);
 	}
 	
-	public String getTable() {
+	public String getNick() {
 		return mNick;
 	}
 	
