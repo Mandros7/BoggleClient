@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 public class ANICKNotificationMessage extends NotificationMessage{
 
-	public static final String SUBTYPE = "start";
+	public static final String SUBTYPE = "nick";
 	private static final String OLD_NICK_TAG = "old_nick";
 	private static final String NEW_NICK_TAG = "new_nick";
 	
