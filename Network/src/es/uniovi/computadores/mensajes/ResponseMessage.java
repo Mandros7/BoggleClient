@@ -72,7 +72,32 @@ public abstract class ResponseMessage extends Message {
 					return new SSTARTResponseMessage(params, description);
 				}
 				return new SSTARTResponseMessage(params);
+			
 				
+			case SJOINResponseMessage.SUBTYPE:
+				if (error) {
+					return new SJOINResponseMessage(params, description);
+				}
+				return new SJOINResponseMessage(params);
+				
+			case SLEAVEResponseMessage.SUBTYPE:
+				if (error) {
+					return new SLEAVEResponseMessage(params, description);
+				}
+				return new SLEAVEResponseMessage(params);
+				
+			case SWHOResponseMessage.SUBTYPE:
+				if (error) {
+					return new SWHOResponseMessage(params, description);
+				}
+				return new SWHOResponseMessage(params);
+				
+			case SLISTResponseMessage.SUBTYPE:
+				if (error) {
+					return new SLISTResponseMessage(params, description);
+				}
+				return new SLISTResponseMessage(params);
+
 			default:
 				throw new IllegalArgumentException("Unknown response message");			
 		}		

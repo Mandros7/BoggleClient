@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 
 /**
- * Representa un mensaje de notificación.
+ * Representa un mensaje de notificaciï¿½n.
  *
  */
 public abstract class NotificationMessage extends Message {
@@ -25,6 +25,15 @@ public abstract class NotificationMessage extends Message {
 
 			case AENDNotificationMessage.SUBTYPE:
 				return new AENDNotificationMessage(params);
+				
+			case ALEAVENotificationMessage.SUBTYPE:
+				return new ALEAVENotificationMessage(params);
+				
+			case ANICKNotificationMessage.SUBTYPE:
+				return new ANICKNotificationMessage(params);
+				
+			case AJOINNotificationMessage.SUBTYPE:
+				return new AJOINNotificationMessage(params);
 				
 			default:
 				throw new IllegalArgumentException("Unknown notification message");			
