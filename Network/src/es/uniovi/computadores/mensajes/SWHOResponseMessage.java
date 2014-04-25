@@ -12,16 +12,16 @@ public class SWHOResponseMessage extends ResponseMessage{
 	
 	SWHOResponseMessage(JSONObject params) {
 		super(SUBTYPE);
-		if (params != null) {
-			throw new IllegalArgumentException("The response does not accept parameters");
+		if (params == null) {
+			throw new IllegalArgumentException("Parameters are required");
 		}
 		parseParams(params);
 	}
 	
 	SWHOResponseMessage(JSONObject params, String errorDescription) {
 		super(SUBTYPE, errorDescription);
-		if (params != null) {
-			throw new IllegalArgumentException("The response does not accept parameters");
+		if (params == null) {
+			throw new IllegalArgumentException("Parameters are required");
 		}
 		parseParams(params);
 	}

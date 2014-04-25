@@ -10,7 +10,7 @@ public class TableStats {
 	
 	private String mName;
 	private boolean mAlreadyPlaying;
-	private int mPlayerCount;
+	private long mPlayerCount;
 	
 	TableStats(JSONObject json) {
 		if (json == null) {
@@ -18,14 +18,14 @@ public class TableStats {
 		}
 		mName = (String) json.get(NAME_TAG);
 		mAlreadyPlaying = (Boolean) json.get(ALREADY_PLAYING_TAG);	
-		mPlayerCount = (int) json.get(PLAYER_COUNT_TAG);
+		mPlayerCount = (long) json.get(PLAYER_COUNT_TAG);
 	}
 	
 	public String getName(){
 		return mName;
 	}
 	
-	public int getPlayerCount(){
+	public long getPlayerCount(){
 		return mPlayerCount;
 	}
 	
