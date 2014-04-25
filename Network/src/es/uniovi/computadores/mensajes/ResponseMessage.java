@@ -97,6 +97,12 @@ public abstract class ResponseMessage extends Message {
 					return new SLISTResponseMessage(params, description);
 				}
 				return new SLISTResponseMessage(params);
+				
+			case SNICKResponseMessage.SUBTYPE:
+				if (error) {
+					return new SNICKResponseMessage(params, description);
+				}
+				return new SNICKResponseMessage(params);
 
 			default:
 				throw new IllegalArgumentException("Unknown response message");			
