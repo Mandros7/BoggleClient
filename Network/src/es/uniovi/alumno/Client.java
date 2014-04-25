@@ -1,30 +1,56 @@
 package es.uniovi.alumno;
 import java.io.*;
+import java.net.Socket;
+import java.net.UnknownHostException;
 //import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-
-import es.uniovi.computadores.Network;
 import es.uniovi.computadores.mensajes.*;
 
 public class Client {
-	private final static Logger LOGGER = Logger.getLogger(Network.class
+	/*private final static Logger LOGGER = Logger.getLogger(Network.class
 			.getName());
+	*/
+	private static Character[][] MATRIX;
+	private static String NICK;
+	private static String TABLE;
+
+	public static Character[][] getMATRIX() {
+		return MATRIX;
+	}
+
+	public static void setMATRIX(Character[][] mATRIX) {
+		MATRIX = mATRIX;
+	}
+
+	public static String getNICK() {
+		return NICK;
+	}
+
+	public static void setNICK(String nICK) {
+		NICK = nICK;
+	}
+
+	public static String getTABLE() {
+		return TABLE;
+	}
+
+	public static void setTABLE(String tABLE) {
+		TABLE = tABLE;
+	}
+
 	
-	public static void main(String[] args) throws InterruptedException {
-		Network red = new Network();
-		LOGGER.setLevel(Level.WARNING);
+	public static void main(String[] args) throws InterruptedException, UnknownHostException, IOException {
+		Socket socket = new Socket("localhost", 12345); 
+		//LOGGER.setLevel(Level.WARNING);
 		System.out.println("Funcionando");
 		ArrayBlockingQueue<Message> OutBuff = new ArrayBlockingQueue<Message>(10);
 		ArrayBlockingQueue<Message>	InBuff = new ArrayBlockingQueue<Message>(10);
 		UserOutput salidaUsuario = new UserOutput(InBuff);
-		NetOutput salidaRed = new NetOutput(red,OutBuff);
+		NetOutput salidaRed = new NetOutput(socket,OutBuff);
 	    UserInput entradaUsuario = new UserInput(OutBuff);
-	    NetInput entradaRed = new NetInput(red, InBuff);
+	    NetInput entradaRed = new NetInput(socket, InBuff);
 	    salidaUsuario.start();
 	    entradaUsuario.start();
 	    salidaRed.start();
@@ -33,7 +59,7 @@ public class Client {
 	    entradaRed.close();
 	    salidaRed.close();
 	    salidaUsuario.close();
-		red.close();
+	    socket.close();
 	}
 
 	
@@ -41,42 +67,68 @@ public class Client {
 
 class NetInput extends Thread {
 	// Hilo de entrada de datos desde la red
-	Network red;
-	byte[] BytesRed;
-	String StringRed;
+
+	Socket socket;
+	String StringRed = "";
 	ArrayBlockingQueue<Message> InBuf;
 	volatile boolean en_ejecucion = true;
 
-	public void close(){
+	public void close() throws IOException{
 		en_ejecucion = false;
+		this.socket.close();
 		this.interrupt();
 	}
-	NetInput(Network n, ArrayBlockingQueue<Message> abq){
-		this.red = n;
+	
+	NetInput(Socket n, ArrayBlockingQueue<Message> abq){
+		this.socket = n;
 		this.InBuf = abq;
 	}
 	
 	public void run(){
 		
 		while (en_ejecucion) {
+				
 			
-			try {
-				//Se espera a recibir una cadena de byte enviados del servidor
-				BytesRed = red.recv();
-			} catch (InterruptedException e) {
-				//e.printStackTrace();
-			}
-			
-			//Se crea un objeto Message, que nos servira para identificar el tipo de respuesta que nos ha enviado
+				try {
+					StringRed = "";
+					int cont = 0;
+					BufferedReader in =
+					        new BufferedReader(
+					            new InputStreamReader(socket.getInputStream()));
+					Character c = (char) in.read();
+					if (c=='{'){
+						StringRed = StringRed+c;
+						cont ++;
+					do {
+						c = (char) in.read();
+						switch (c) {
+						case ('{'):
+							cont ++;
+							break;
+
+						case ('}'):
+							cont --;
+							break;
+					}
+						StringRed = StringRed+c;
+					} while (cont>0);
+					}
+		
+					JSONObject json = (JSONObject) JSONValue.parse(StringRed);
+					Message msg = Message.createFromJSON(json);
+					try {
+						InBuf.put(msg);
+					} catch (InterruptedException e) {
+						//e.printStackTrace();
+					}
+		
+					} catch (IOException e1) {
+						//e1.printStackTrace();
+				}
+				
+				
+			//Se crea un objeto Message, que nos servir��������� para identificar el tipo de respuesta que nos ha enviado
 			//el servidor
-			StringRed = new String(BytesRed);
-			JSONObject json = (JSONObject) JSONValue.parse(StringRed);
-			Message msg = Message.createFromJSON(json);
-			try {
-				InBuf.put(msg);
-			} catch (InterruptedException e) {
-				//e.printStackTrace();
-			}
 		}
 	}
 	
@@ -84,18 +136,21 @@ class NetInput extends Thread {
 
 class NetOutput extends Thread {
 	// Hilo de salida de datos hacia la red
-	Network red;
+	
+	Socket socket;
 	ArrayBlockingQueue<Message> OutBuf;
 	Message msg;
 	volatile boolean en_ejecucion = true;
 	
-	public void close(){
+	public void close() throws IOException{
 		en_ejecucion = false;
+		this.socket.close();
 		this.interrupt();
 	}
 	
-	NetOutput(Network n, ArrayBlockingQueue<Message> abq){
-		this.red = n;
+	NetOutput(Socket n, ArrayBlockingQueue<Message> abq){
+		
+		this.socket = n;
 		this.OutBuf = abq;
 	}
 	
@@ -106,7 +161,11 @@ class NetOutput extends Thread {
 			//Se extrae el objeto Comando del buffer circular
 			try {
 				msg = OutBuf.take();
-				red.send(msg.toJSON().toString().getBytes());
+				try {
+					socket.getOutputStream().write(msg.toJSON().toString().getBytes(), 0, msg.toJSON().toString().getBytes().length);
+				} catch (IOException e) {
+					//e.printStackTrace();
+				}
 			} catch (InterruptedException e) {
 				//e.printStackTrace();
 			}
