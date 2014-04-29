@@ -4,8 +4,10 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 //import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
+
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+
 import es.uniovi.computadores.mensajes.*;
 
 public class Client {
@@ -42,7 +44,15 @@ public class Client {
 
 	
 	public static void main(String[] args) throws InterruptedException, UnknownHostException, IOException {
-		Socket socket = new Socket("localhost", 12345); 
+		if (args.length!=3){
+			System.out.println("Client <NICK> <IP> <PORT>");
+			return;
+		}
+		
+		String nick = args[0];
+		String IP = args[1];
+		int port = Integer.parseInt(args[2]);
+		Socket socket = new Socket(IP, port); 
 		//LOGGER.setLevel(Level.WARNING);
 		System.out.println("Funcionando");
 		ArrayBlockingQueue<Message> OutBuff = new ArrayBlockingQueue<Message>(10);
@@ -55,6 +65,8 @@ public class Client {
 	    entradaUsuario.start();
 	    salidaRed.start();
 	    entradaRed.start();
+	    NICKCommandMessage nick_inicial = new NICKCommandMessage(nick);
+	    OutBuff.put(nick_inicial);
 	    entradaUsuario.join(); 
 	    entradaRed.close();
 	    salidaRed.close();
@@ -185,7 +197,8 @@ class UserInput extends Thread{
     	InputStreamReader isr = new InputStreamReader(System.in);
 		BufferedReader br = new BufferedReader(isr);
         while (funcionando){
-			try {
+        	try {
+				System.out.print("["+Client.getTABLE()+"]"+Client.getNICK()+">");
 				entrada = br.readLine();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -272,6 +285,7 @@ class UserOutput extends Thread{
 						System.out.println("Se ha iniciado la partida");
 						System.out.println("------------");
 						Character[][] MATRIX = ((ASTARTNotificationMessage) msg).getMatrix();
+						Client.setMATRIX(MATRIX);
 						for (int i=0; i<MATRIX.length;i++){
 							String line = "";
 							for (int j = 0; j<MATRIX.length;j++){
@@ -347,17 +361,20 @@ class UserOutput extends Thread{
 						if (msg instanceof SJOINResponseMessage) {
 							String mesa = ((SJOINResponseMessage)msg).getTable();
 							System.out.println("Te has unido a la mesa " + mesa);
+							Client.setTABLE(mesa);
 						}
 						if (msg instanceof SLEAVEResponseMessage) {
 							System.out.println("Has abadonado la mesa.");
+							Client.setTABLE("Ninguna");
 						}
 						if (msg instanceof SNICKResponseMessage) {
 							String nick = ((SNICKResponseMessage)msg).getNick();
 							System.out.println("Tu nuevo nick es: " + nick);
+							Client.setNICK(nick);
 							//VARIABLE NICK
 						}
 						if (msg instanceof SLISTResponseMessage) {
-							String añadido;
+							String anadido;
 							int tam = ((SLISTResponseMessage)msg).getTables().size();
 							
 							for (int i=0; i<tam; i++) {
@@ -367,14 +384,17 @@ class UserOutput extends Thread{
 											((SLISTResponseMessage)msg).getTables().get(i).getPlayerCount() +
 												" jugadores ";
 								if (((SLISTResponseMessage)msg).getTables().get(i).getAlreadyPlaying()) {
-									añadido = " y la partida ya se ha iniciado.";
+									anadido = " y la partida ya se ha iniciado.";
 								}
 								else {
-									añadido = " y la partida aún no se ha iniciado";
+									anadido = " y la partida aun no se ha iniciado";
 								}
-								System.out.println(info_tables + añadido);
+								System.out.println(info_tables + anadido);
 							}
 							
+						}
+						if (msg instanceof SSTARTResponseMessage){
+							System.out.println("Esperando a otros jugadores");
 						}
 						if (msg instanceof SWHOResponseMessage) {
 							int tam = ((SWHOResponseMessage)msg).getNicks().length;
