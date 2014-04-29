@@ -266,6 +266,7 @@ class UserInput extends Thread{
                       	}
                       	break;
                       case ("/WHO"):
+                    	System.out.println("hola que tal");
                   		WHOCommandMessage who = new WHOCommandMessage();
                   		try {
                       		OutBuf.put(who);
@@ -457,6 +458,7 @@ class UserOutput extends Thread{
 						}
 						if (msg instanceof SWHOResponseMessage) {
 							int tam = ((SWHOResponseMessage)msg).getNicks().length;
+							System.out.println("Tamaño: " + tam);
 							if (tam==1) {
 								System.out.println("El jugador de esta mesa es: " + ((SWHOResponseMessage)msg).getNicks()[0]);
 							}
@@ -465,13 +467,17 @@ class UserOutput extends Thread{
 								for (int i=0; i<tam; i++) {
 									if (i==0) {
 										jugadores = jugadores + ((SWHOResponseMessage)msg).getNicks()[i];
+										System.out.println("Primer if" + i);
 									}
-									if (i==tam-1) {
-										jugadores = jugadores + " y " + ((SWHOResponseMessage)msg).getNicks()[i];									
+									else if (i==tam-1) {
+										jugadores = jugadores + " y " + ((SWHOResponseMessage)msg).getNicks()[i];
+										System.out.println("Segundo if" + i);
 									}
-									jugadores = jugadores + ", " + ((SWHOResponseMessage)msg).getNicks()[i];
+									else {
+										jugadores = jugadores + ", " + ((SWHOResponseMessage)msg).getNicks()[i];
+									}
 								}
-								
+								System.out.println(jugadores);
 							}
 							
 						}
