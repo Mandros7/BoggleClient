@@ -87,8 +87,7 @@ class NetInput extends Thread {
 	public void run(){
 		
 		while (en_ejecucion) {
-				
-			
+
 				try {
 					StringRed = "";
 					int cont = 0;
@@ -186,52 +185,64 @@ class UserInput extends Thread{
     	InputStreamReader isr = new InputStreamReader(System.in);
 		BufferedReader br = new BufferedReader(isr);
         while (funcionando){
-				try {
-					entrada = br.readLine();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-                System.out.println(entrada);
-                entrada = entrada.toUpperCase();
-                if (entrada.length()>2){
-                    String [] datos = entrada.split(" ");
-                    if (entrada.charAt(0)=='/'){
-	                    switch (datos[0]) {
-	                    
-	                        case ("/START"):		                   
-	                            STARTCommandMessage start = new STARTCommandMessage();
-								try {
-									OutBuf.put(start);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
-								break;
-								
-	                        case ("/QUIT"):
-	                        	funcionando=false;
-	                        	break;
+			try {
+				entrada = br.readLine();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            System.out.println(entrada);
+            entrada = entrada.toUpperCase();
+            if (entrada.length()>2){
+                String [] datos = entrada.split(" ");
+                if (entrada.charAt(0)=='/'){
+                    switch (datos[0]) {
+                        case ("/START"):		                   
+                            STARTCommandMessage start = new STARTCommandMessage();
+							try {
+								OutBuf.put(start);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+							break;
+							
+                        case ("/QUIT"):
+                        	funcionando=false;
+                        	break;
 
-	                        case ("/WORD"):
-	                        	if (datos.length>1){
-		                        	if (datos.length>2){
-		                        		System.out.println("Solo se reconoce "+datos[1]+" como palabra");
-		                        	}
-		                        	
-			                            WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[1]));
-			                            try {
-											OutBuf.put(word);
-										} catch (InterruptedException e) {
-											e.printStackTrace();
-										}	
+                        case ("/WORD"):
+                        	if (datos.length>1){
+	                        	if (datos.length>2){
+	                        		System.out.println("Solo se reconoce "+datos[1]+" como palabra");
 	                        	}
-	                        	break;
-	                        default:
-	                            break;
-	                    }
-               
+	                        	
+		                            WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[1]));
+		                            try {
+										OutBuf.put(word);
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}	
+                        	}
+                        	break;
+                        default:
+                            break;
                     }
-              }
-       }
+           
+                }
+                else{
+                	if (funcionando){
+                        WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[0]));
+                        try {
+							OutBuf.put(word);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+                	}
+                	else {
+                        System.out.println("La partida aun no se ha iniciado.");
+                    }
+                }
+          }
+      }
       try {
 		isr.close();
 		} catch (IOException e) {
