@@ -197,15 +197,13 @@ class UserInput extends Thread{
     	InputStreamReader isr = new InputStreamReader(System.in);
 		BufferedReader br = new BufferedReader(isr);
         while (funcionando){
-        	try {
-				System.out.print("["+Client.getTABLE()+"]"+Client.getNICK()+">");
+        	try {				
 				entrada = br.readLine();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-            System.out.println(entrada);
-//            entrada = entrada.toUpperCase();
-//          entrada = entrada.toUpperCase();
+            System.out.print("["+Client.getTABLE()+"]"+Client.getNICK()+"> ");
+
           if (entrada.length()>2){
               String [] datos = entrada.split(" ");
               if (entrada.charAt(0)=='/'){
@@ -277,16 +275,16 @@ class UserInput extends Thread{
                       	funcionando=false;
                       	break;
                       case ("/WORD"):
-                      	if (datos.length>1){
-	                        	if (datos.length>2){
-	                        		System.out.println("Solo se reconoce "+datos[1]+" como palabra");
-	                        	}
-		                            WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[1]));
-		                            try {
-										OutBuf.put(word);
-									} catch (InterruptedException e) {
-										e.printStackTrace();
-									}	
+                      if (datos.length>1){
+	                        if (datos.length>2){
+	                        	System.out.println("Solo se reconoce "+datos[1]+" como palabra");
+	                        }
+	                        WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[1]));
+	                        try {
+								OutBuf.put(word);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}	
                       	}
                       	else {
                       		System.out.println("Debes escribir una palabra.\n" +
@@ -311,6 +309,9 @@ class UserInput extends Thread{
                       System.out.println("La partida aun no se ha iniciado.");
                   }
               }
+          }
+          else {
+        	  System.out.println("Longitud minima: 3 caracteres.");
           }
       }
       try {
