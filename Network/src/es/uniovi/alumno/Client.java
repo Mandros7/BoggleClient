@@ -127,7 +127,7 @@ class NetInput extends Thread {
 				}
 				
 				
-			//Se crea un objeto Message, que nos servirï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ para identificar el tipo de respuesta que nos ha enviado
+			//Se crea un objeto Message, que nos servira para identificar el tipo de respuesta que nos ha enviado
 			//el servidor
 		}
 	}
@@ -294,6 +294,27 @@ class UserOutput extends Thread{
 							i++;
 						}
 					}
+					if (msg instanceof AJOINNotificationMessage) {
+						String nick_usuario = ((AJOINNotificationMessage)msg).getNick();
+						System.out.println("El usuario " +
+								nick_usuario +
+									" se ha unido a la mesa");
+					}
+					if (msg instanceof ANICKNotificationMessage) {
+						String new_nick = ((ANICKNotificationMessage)msg).getNewNick();
+						String old_nick = ((ANICKNotificationMessage)msg).getOldNick();
+						System.out.println("Nick anterior: " + old_nick +
+								"\n" +
+									"Nick nuevo: " + new_nick);
+						
+					}
+					if (msg instanceof ALEAVENotificationMessage) {
+						String nick_leave = ((ALEAVENotificationMessage)msg).getNick();
+						System.out.println("El usuario " +
+								nick_leave +
+									" ha abandonado la mesa.");
+						
+					}
 				}
 				if (msg instanceof ResponseMessage){
 					if (((ResponseMessage) msg).isError()){
@@ -311,6 +332,58 @@ class UserOutput extends Thread{
 							else {
 								System.out.println("La palabra "+word+" ya existia.");
 							}
+						}
+						if (msg instanceof SJOINResponseMessage) {
+							String mesa = ((SJOINResponseMessage)msg).getTable();
+							System.out.println("Te has unido a la mesa " + mesa);
+						}
+						if (msg instanceof SLEAVEResponseMessage) {
+							System.out.println("Has abadonado la mesa.");
+						}
+						if (msg instanceof SNICKResponseMessage) {
+							String nick = ((SNICKResponseMessage)msg).getNick();
+							System.out.println("Tu nuevo nick es: " + nick);
+							//VARIABLE NICK
+						}
+						if (msg instanceof SLISTResponseMessage) {
+							String añadido;
+							int tam = ((SLISTResponseMessage)msg).getTables().size();
+							
+							for (int i=0; i<tam; i++) {
+								String info_tables = "En la mesa " +
+										((SLISTResponseMessage)msg).getTables().get(i).getName() +
+											" hay " +
+											((SLISTResponseMessage)msg).getTables().get(i).getPlayerCount() +
+												" jugadores ";
+								if (((SLISTResponseMessage)msg).getTables().get(i).getAlreadyPlaying()) {
+									añadido = " y la partida ya se ha iniciado.";
+								}
+								else {
+									añadido = " y la partida aún no se ha iniciado";
+								}
+								System.out.println(info_tables + añadido);
+							}
+							
+						}
+						if (msg instanceof SWHOResponseMessage) {
+							int tam = ((SWHOResponseMessage)msg).getNicks().length;
+							if (tam==1) {
+								System.out.println("El jugador de esta mesa es: " + ((SWHOResponseMessage)msg).getNicks()[0]);
+							}
+							else {
+								String jugadores = "Los jugadores de esta mesa son: ";
+								for (int i=0; i<tam; i++) {
+									if (i==0) {
+										jugadores = jugadores + ((SWHOResponseMessage)msg).getNicks()[i];
+									}
+									if (i==tam-1) {
+										jugadores = jugadores + " y " + ((SWHOResponseMessage)msg).getNicks()[i];									
+									}
+									jugadores = jugadores + ", " + ((SWHOResponseMessage)msg).getNicks()[i];
+								}
+								
+							}
+							
 						}
 					}
 				}
