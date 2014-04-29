@@ -467,11 +467,9 @@ class UserOutput extends Thread{
 								for (int i=0; i<tam; i++) {
 									if (i==0) {
 										jugadores = jugadores + ((SWHOResponseMessage)msg).getNicks()[i];
-										System.out.println("Primer if" + i);
 									}
 									else if (i==tam-1) {
 										jugadores = jugadores + " y " + ((SWHOResponseMessage)msg).getNicks()[i];
-										System.out.println("Segundo if" + i);
 									}
 									else {
 										jugadores = jugadores + ", " + ((SWHOResponseMessage)msg).getNicks()[i];
