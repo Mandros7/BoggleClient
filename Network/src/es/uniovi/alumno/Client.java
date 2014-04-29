@@ -203,7 +203,9 @@ class UserInput extends Thread{
 				e.printStackTrace();
 			}
             System.out.print("["+Client.getTABLE()+"]"+Client.getNICK()+"> ");
-
+            if (entrada.toUpperCase().equals("/QUIT")) {
+            	System.out.println("Hasta luego.");
+            }
           if (entrada.length()>2){
               String [] datos = entrada.split(" ");
               if (entrada.charAt(0)=='/'){
@@ -372,7 +374,7 @@ class UserOutput extends Thread{
 						while (i<((AENDNotificationMessage)msg).getPlayers().size()) {
 							System.out.println("El jugador " +
 									((AENDNotificationMessage)msg).getPlayers().get(i).getNick() +
-										" ha obtenido una puntuaci���n de " +
+										" ha obtenido una puntuacion de " +
 										((AENDNotificationMessage)msg).getPlayers().get(i).getScore() + " puntos");
 							i++;
 						}
@@ -386,17 +388,16 @@ class UserOutput extends Thread{
 					if (msg instanceof ANICKNotificationMessage) {
 						String new_nick = ((ANICKNotificationMessage)msg).getNewNick();
 						String old_nick = ((ANICKNotificationMessage)msg).getOldNick();
-						System.out.println("Nick anterior: " + old_nick +
-								"\n" +
-									"Nick nuevo: " + new_nick);
-						
+						System.out.println("El usuario " +
+								old_nick +
+									" ha cambiado su nick por " +
+										new_nick);
 					}
 					if (msg instanceof ALEAVENotificationMessage) {
 						String nick_leave = ((ALEAVENotificationMessage)msg).getNick();
 						System.out.println("El usuario " +
 								nick_leave +
 									" ha abandonado la mesa.");
-						
 					}
 				}
 				if (msg instanceof ResponseMessage){
