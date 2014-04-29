@@ -6,7 +6,7 @@ public class WHOCommandMessage extends CommandMessage{
 	
 	public static final String SUBTYPE = "who";
 
-	WHOCommandMessage() {
+	public WHOCommandMessage() {
 		super(SUBTYPE);
 	}
 

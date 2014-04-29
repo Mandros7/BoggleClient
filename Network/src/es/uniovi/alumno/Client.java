@@ -204,56 +204,113 @@ class UserInput extends Thread{
 				e.printStackTrace();
 			}
             System.out.println(entrada);
-            entrada = entrada.toUpperCase();
-            if (entrada.length()>2){
-                String [] datos = entrada.split(" ");
-                if (entrada.charAt(0)=='/'){
-                    switch (datos[0]) {
-                        case ("/START"):		                   
-                            STARTCommandMessage start = new STARTCommandMessage();
+//            entrada = entrada.toUpperCase();
+//          entrada = entrada.toUpperCase();
+          if (entrada.length()>2){
+              String [] datos = entrada.split(" ");
+              if (entrada.charAt(0)=='/'){
+              	datos[0] = datos[0].toUpperCase();
+                  switch (datos[0]) {
+                      case ("/START"):		                   
+                          STARTCommandMessage start = new STARTCommandMessage();
 							try {
 								OutBuf.put(start);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
 							break;
-							
-                        case ("/QUIT"):
-                        	funcionando=false;
-                        	break;
-
-                        case ("/WORD"):
-                        	if (datos.length>1){
+                      case ("/NICK"):
+                      	if (datos.length!=2) {
+                      		System.out.println("Numero de arumentos incorrecto.\n" +
+                      				"Formato: /nick <nick>");
+                      	}
+                      	else {
+	                    		NICKCommandMessage nick = new NICKCommandMessage(datos[1]);
+	                    		try {
+	                        		OutBuf.put(nick);
+	                        	} catch (InterruptedException e) {
+	                        		e.printStackTrace();
+	                        	}
+                      	}
+                      	break;
+                      case ("/JOIN"):
+                      	if (datos.length!=2) {
+                      		System.out.println("Numero de arumentos incorrecto.\n" +
+                      				"Formato: /join <mesa>");
+                      	}
+                      	else {
+	                    		JOINCommandMessage join = new JOINCommandMessage(datos[1]);
+	                    		try {
+	                        		OutBuf.put(join);
+	                        	} catch (InterruptedException e) {
+	                        		e.printStackTrace();
+	                        	}
+                      	}
+                      	break;
+                      case ("/LEAVE"):
+                      	if (funcionando) {
+                      		LEAVECommandMessage leave = new LEAVECommandMessage();
+                      		try {
+	                        		OutBuf.put(leave);
+	                        	} catch (InterruptedException e) {
+	                        		e.printStackTrace();
+	                        	}
+                      	}
+                      	break;
+                      case ("/LIST"):
+                  		LISTCommandMessage list = new LISTCommandMessage();
+                  		try {
+                      		OutBuf.put(list);
+                      	} catch (InterruptedException e) {
+                      		e.printStackTrace();
+                      	}
+                      	break;
+                      case ("/WHO"):
+                  		WHOCommandMessage who = new WHOCommandMessage();
+                  		try {
+                      		OutBuf.put(who);
+                      	} catch (InterruptedException e) {
+                      		e.printStackTrace();
+                      	}
+                      	break;
+                      case ("/QUIT"):
+                      	funcionando=false;
+                      	break;
+                      case ("/WORD"):
+                      	if (datos.length>1){
 	                        	if (datos.length>2){
 	                        		System.out.println("Solo se reconoce "+datos[1]+" como palabra");
 	                        	}
-	                        	
 		                            WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[1]));
 		                            try {
 										OutBuf.put(word);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}	
-                        	}
-                        	break;
-                        default:
-                            break;
-                    }
-           
-                }
-                else{
-                	if (funcionando){
-                        WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[0]));
-                        try {
+                      	}
+                      	else {
+                      		System.out.println("Debes escribir una palabra.\n" +
+                      				"Formato: /word <palabra>");
+                      	}
+                      	break;
+                      default:
+                      	System.out.println("Has introducido un comando incorrecto.");
+                          break;
+                  }
+              }
+              else{
+              	if (funcionando){
+                      WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[0]));
+                      try {
 							OutBuf.put(word);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
-                	}
-                	else {
-                        System.out.println("La partida aun no se ha iniciado.");
-                    }
-                }
+              	}
+              	else {
+                      System.out.println("La partida aun no se ha iniciado.");
+                  }
+              }
           }
       }
       try {
@@ -394,7 +451,7 @@ class UserOutput extends Thread{
 							
 						}
 						if (msg instanceof SSTARTResponseMessage){
-							System.out.println("Esperando a otros jugadores");
+							System.out.println("Esperando al resto de jugadores...");
 						}
 						if (msg instanceof SWHOResponseMessage) {
 							int tam = ((SWHOResponseMessage)msg).getNicks().length;
