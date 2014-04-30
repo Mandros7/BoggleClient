@@ -65,8 +65,8 @@ public class Client {
 	    entradaUsuario.start();
 	    salidaRed.start();
 	    entradaRed.start();
-	    NICKCommandMessage nick_inicial = new NICKCommandMessage(nick);
-	    OutBuff.put(nick_inicial);
+	    NICKCommandMessage init_nick = new NICKCommandMessage(nick);
+	    OutBuff.put(init_nick);
 	    entradaUsuario.join(); 
 	    entradaRed.close();
 	    salidaRed.close();
@@ -81,7 +81,7 @@ class NetInput extends Thread {
 	// Hilo de entrada de datos desde la red
 
 	Socket socket;
-	String StringRed = "";
+	String stringNet = "";
 	ArrayBlockingQueue<Message> InBuf;
 	volatile boolean en_ejecucion = true;
 
@@ -101,14 +101,14 @@ class NetInput extends Thread {
 		while (en_ejecucion) {
 
 				try {
-					StringRed = "";
+					stringNet = "";
 					int cont = 0;
 					BufferedReader in =
 					        new BufferedReader(
 					            new InputStreamReader(socket.getInputStream()));
 					Character c = (char) in.read();
 					if (c=='{'){
-						StringRed = StringRed+c;
+						stringNet = stringNet+c;
 						cont ++;
 					do {
 						c = (char) in.read();
@@ -121,11 +121,11 @@ class NetInput extends Thread {
 							cont --;
 							break;
 					}
-						StringRed = StringRed+c;
+						stringNet = stringNet+c;
 					} while (cont>0);
 					}
 		
-					JSONObject json = (JSONObject) JSONValue.parse(StringRed);
+					JSONObject json = (JSONObject) JSONValue.parse(stringNet);
 					Message msg = Message.createFromJSON(json);
 					try {
 						InBuf.put(msg);
@@ -187,30 +187,28 @@ class NetOutput extends Thread {
 class UserInput extends Thread{
 	// Hilo de entrada por teclado del usuario
 	ArrayBlockingQueue<Message> OutBuf;
-	String entrada;
+	String input;
 	UserInput(ArrayBlockingQueue<Message> abq){
 		this.OutBuf = abq;
     }
-	
+
     public void run() { 
         boolean funcionando=true;
     	InputStreamReader isr = new InputStreamReader(System.in);
 		BufferedReader br = new BufferedReader(isr);
         while (funcionando){
         	try {				
-				entrada = br.readLine();
+				input = br.readLine();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-            System.out.print("["+Client.getTABLE()+"]"+Client.getNICK()+"> ");
-            if (entrada.toUpperCase().equals("/QUIT")) {
-            	System.out.println("Hasta luego.");
-            }
-          if (entrada.length()>2){
-              String [] datos = entrada.split(" ");
-              if (entrada.charAt(0)=='/'){
-              	datos[0] = datos[0].toUpperCase();
-                  switch (datos[0]) {
+          if (input.length()>2){
+        	  String inputFixed = input.replaceAll(" +", " ").trim();
+        	  //Sustuye los espacios si son 2 o mas seguidos por uno unico y elimina espacios al principio y al final.
+              String [] data = inputFixed.split(" ");             
+              if (inputFixed.charAt(0)=='/'){
+              	data[0] = data[0].toUpperCase();
+                  switch (data[0]) {
                       case ("/START"):		                   
                           STARTCommandMessage start = new STARTCommandMessage();
 							try {
@@ -220,12 +218,12 @@ class UserInput extends Thread{
 							}
 							break;
                       case ("/NICK"):
-                      	if (datos.length!=2) {
+                      	if (data.length!=2) {
                       		System.out.println("Numero de arumentos incorrecto.\n" +
                       				"Formato: /nick <nick>");
                       	}
                       	else {
-	                    		NICKCommandMessage nick = new NICKCommandMessage(datos[1]);
+	                    		NICKCommandMessage nick = new NICKCommandMessage(data[1]);
 	                    		try {
 	                        		OutBuf.put(nick);
 	                        	} catch (InterruptedException e) {
@@ -234,12 +232,12 @@ class UserInput extends Thread{
                       	}
                       	break;
                       case ("/JOIN"):
-                      	if (datos.length!=2) {
+                      	if (data.length!=2) {
                       		System.out.println("Numero de arumentos incorrecto.\n" +
                       				"Formato: /join <mesa>");
                       	}
                       	else {
-	                    		JOINCommandMessage join = new JOINCommandMessage(datos[1]);
+	                    		JOINCommandMessage join = new JOINCommandMessage(data[1]);
 	                    		try {
 	                        		OutBuf.put(join);
 	                        	} catch (InterruptedException e) {
@@ -275,14 +273,15 @@ class UserInput extends Thread{
                       	}
                       	break;
                       case ("/QUIT"):
+                    	System.out.println("Hasta luego.");
                       	funcionando=false;
                       	break;
                       case ("/WORD"):
-                      if (datos.length>1){
-	                        if (datos.length>2){
-	                        	System.out.println("Solo se reconoce "+datos[1]+" como palabra");
+                      if (data.length>1){
+	                        if (data.length>2){
+	                        	System.out.println("Solo se reconoce "+data[1]+" como palabra");
 	                        }
-	                        WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[1]));
+	                        WORDCommandMessage word = new WORDCommandMessage(new WordStats(data[1]));
 	                        try {
 								OutBuf.put(word);
 							} catch (InterruptedException e) {
@@ -301,7 +300,7 @@ class UserInput extends Thread{
               }
               else{
               	if (funcionando){
-                      WORDCommandMessage word = new WORDCommandMessage(new WordStats(datos[0]));
+                      WORDCommandMessage word = new WORDCommandMessage(new WordStats(data[0]));
                       try {
 							OutBuf.put(word);
 						} catch (InterruptedException e) {
@@ -458,24 +457,24 @@ class UserOutput extends Thread{
 						}
 						if (msg instanceof SWHOResponseMessage) {
 							int tam = ((SWHOResponseMessage)msg).getNicks().length;
-							System.out.println("Tamaño: " + tam);
+							System.out.println("Tamaï¿½o: " + tam);
 							if (tam==1) {
 								System.out.println("El jugador de esta mesa es: " + ((SWHOResponseMessage)msg).getNicks()[0]);
 							}
 							else {
-								String jugadores = "Los jugadores de esta mesa son: ";
+								String players = "Los jugadores de esta mesa son: ";
 								for (int i=0; i<tam; i++) {
 									if (i==0) {
-										jugadores = jugadores + ((SWHOResponseMessage)msg).getNicks()[i];
+										players = players + ((SWHOResponseMessage)msg).getNicks()[i];
 									}
 									else if (i==tam-1) {
-										jugadores = jugadores + " y " + ((SWHOResponseMessage)msg).getNicks()[i];
+										players = players + " y " + ((SWHOResponseMessage)msg).getNicks()[i];
 									}
 									else {
-										jugadores = jugadores + ", " + ((SWHOResponseMessage)msg).getNicks()[i];
+										players = players + ", " + ((SWHOResponseMessage)msg).getNicks()[i];
 									}
 								}
-								System.out.println(jugadores);
+								System.out.println(players);
 							}
 							
 						}
@@ -485,7 +484,8 @@ class UserOutput extends Thread{
 				
 			} catch (InterruptedException e) {
 				//e.printStackTrace();
-			}}
+			}
+            System.out.print("["+Client.getTABLE()+"]"+Client.getNICK()+"> ");}
 	}
 }
 
