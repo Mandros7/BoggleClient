@@ -203,106 +203,11 @@ class UserInput extends Thread{
         while (funcionando){
         	try {				
 				input = br.readLine();
+				mb.newInput(input);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-          if (input.length()>2){
-        	  String inputFixed = input.replaceAll(" +", " ").trim();
-        	  //Sustuye los espacios si son 2 o mas seguidos por uno unico y elimina espacios al principio y al final.
-              String [] data = inputFixed.split(" ");             
-              if (inputFixed.charAt(0)=='/'){
-              	data[0] = data[0].toUpperCase();
-                  switch (data[0]) {
-                      case ("/START"):		                   
-                            mb.startGame();
-							break;
-                      case ("/NICK"):
-                      	if (data.length!=2) {
-                      		System.out.println("Numero de arumentos incorrecto.\n" +
-                      				"Formato: /nick <nick>");
-                      	}
-                      	else {
-	                    		mb.changeNick(data[1]);
-                      	}
-                      	break;
-                      case ("/JOIN"):
-                      	if (data.length!=2) {
-                      		System.out.println("Numero de arumentos incorrecto.\n" +
-                      				"Formato: /join <mesa>");
-                      	}
-                      	else {
-	                    		mb.joinTable(data[1]);
-                      	}
-                      	break;
-                      case ("/LEAVE"):
-                      	if (funcionando) {
-                      		mb.leaveTable();
-                      	}
-                      	break;
-                      	
-                      case ("/MATRIX"):
-                      	if (Client.getMATRIX() != null){
-                      		Character[][] MATRIX = Client.getMATRIX();
-	                        	System.out.println("------------");
-	                        	for (int i=0; i<MATRIX.length;i++){
-									String line = "";
-									for (int j = 0; j<MATRIX.length;j++){
-										line = line + (MATRIX[i][j]);
-										if (j!=MATRIX.length-1){
-											line = line + ", ";
-										}
-									}
-									System.out.println(line);
-								}
-								System.out.println("------------");
-                      	}
-                      	else {
-                      		System.out.println("No se ha recibido matriz del servidor");
-                      	}
-                      	break;
-                      	
-                      case ("/LIST"):
-                  		mb.listTables();
-                      	break;
-                      	
-                      case ("/WHO"):
-                  		mb.whoTable();
-                      	break;
-                      	
-                      case ("/QUIT"):
-                    	System.out.println("Hasta luego.");
-                      	funcionando=false;
-                      	break;
-                      	
-                      case ("/WORD"):
-                      if (data.length>1){
-	                        if (data.length>2){
-	                        	System.out.println("Solo se reconoce "+data[1]+" como palabra");
-	                        }
-	                        mb.sendWord(data[1]);
-                      	}
-                      	else {
-                      		System.out.println("Debes escribir una palabra.\n" +
-                      				"Formato: /word <palabra>");
-                      	}
-                      	break;
-                      default:
-                      	System.out.println("Has introducido un comando incorrecto.");
-                          break;
-                  }
-              }
-              else{
-              	if (funcionando){
-                      mb.sendWord(data[0]);
-              	}
-              	else {
-                      System.out.println("La partida aun no se ha iniciado.");
-                  }
-              }
-          }
-          else {
-        	  System.out.println("Longitud minima: 3 caracteres.");
-          }
+          
       }
       try {
 		isr.close();
