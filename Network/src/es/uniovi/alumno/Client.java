@@ -53,24 +53,29 @@ public class Client {
 		String IP = args[1];
 		int port = Integer.parseInt(args[2]);
 		Socket socket = new Socket(IP, port); 
-		//LOGGER.setLevel(Level.WARNING);
 		System.out.println("Funcionando");
+		
 		ArrayBlockingQueue<Message> OutBuff = new ArrayBlockingQueue<Message>(10);
 		ArrayBlockingQueue<Message>	InBuff = new ArrayBlockingQueue<Message>(10);
 		UserOutput salidaUsuario = new UserOutput(InBuff);
 		NetOutput salidaRed = new NetOutput(socket,OutBuff);
 	    UserInput entradaUsuario = new UserInput(OutBuff);
 	    NetInput entradaRed = new NetInput(socket, InBuff);
+	    
 	    salidaUsuario.start();
 	    entradaUsuario.start();
 	    salidaRed.start();
 	    entradaRed.start();
+	    
 	    NICKCommandMessage init_nick = new NICKCommandMessage(nick);
 	    OutBuff.put(init_nick);
+	    
 	    entradaUsuario.join(); 
 	    entradaRed.close();
 	    salidaRed.close();
 	    salidaUsuario.close();
+	    entradaRed.join();
+	    salidaRed.join();
 	    socket.close();
 	}
 
@@ -87,7 +92,6 @@ class NetInput extends Thread {
 
 	public void close() throws IOException{
 		en_ejecucion = false;
-		this.socket.close();
 		this.interrupt();
 	}
 	
@@ -130,11 +134,11 @@ class NetInput extends Thread {
 					try {
 						InBuf.put(msg);
 					} catch (InterruptedException e) {
-						//e.printStackTrace();
+						e.printStackTrace();
 					}
 		
 					} catch (IOException e1) {
-						//e1.printStackTrace();
+						e1.printStackTrace();
 				}
 				
 				
@@ -155,7 +159,6 @@ class NetOutput extends Thread {
 	
 	public void close() throws IOException{
 		en_ejecucion = false;
-		this.socket.close();
 		this.interrupt();
 	}
 	
@@ -175,7 +178,7 @@ class NetOutput extends Thread {
 				try {
 					socket.getOutputStream().write(msg.toJSON().toString().getBytes(), 0, msg.toJSON().toString().getBytes().length);
 				} catch (IOException e) {
-					//e.printStackTrace();
+					e.printStackTrace();
 				}
 			} catch (InterruptedException e) {
 				//e.printStackTrace();
@@ -196,6 +199,7 @@ class UserInput extends Thread{
         boolean funcionando=true;
     	InputStreamReader isr = new InputStreamReader(System.in);
 		BufferedReader br = new BufferedReader(isr);
+		MessageBuilder mb = new MessageBuilder(OutBuf);
         while (funcionando){
         	try {				
 				input = br.readLine();
@@ -210,12 +214,7 @@ class UserInput extends Thread{
               	data[0] = data[0].toUpperCase();
                   switch (data[0]) {
                       case ("/START"):		                   
-                          STARTCommandMessage start = new STARTCommandMessage();
-							try {
-								OutBuf.put(start);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
+                            mb.startGame();
 							break;
                       case ("/NICK"):
                       	if (data.length!=2) {
@@ -223,12 +222,7 @@ class UserInput extends Thread{
                       				"Formato: /nick <nick>");
                       	}
                       	else {
-	                    		NICKCommandMessage nick = new NICKCommandMessage(data[1]);
-	                    		try {
-	                        		OutBuf.put(nick);
-	                        	} catch (InterruptedException e) {
-	                        		e.printStackTrace();
-	                        	}
+	                    		mb.changeNick(data[1]);
                       	}
                       	break;
                       case ("/JOIN"):
@@ -237,56 +231,55 @@ class UserInput extends Thread{
                       				"Formato: /join <mesa>");
                       	}
                       	else {
-	                    		JOINCommandMessage join = new JOINCommandMessage(data[1]);
-	                    		try {
-	                        		OutBuf.put(join);
-	                        	} catch (InterruptedException e) {
-	                        		e.printStackTrace();
-	                        	}
+	                    		mb.joinTable(data[1]);
                       	}
                       	break;
                       case ("/LEAVE"):
                       	if (funcionando) {
-                      		LEAVECommandMessage leave = new LEAVECommandMessage();
-                      		try {
-	                        		OutBuf.put(leave);
-	                        	} catch (InterruptedException e) {
-	                        		e.printStackTrace();
-	                        	}
+                      		mb.leaveTable();
                       	}
                       	break;
+                      	
+                      case ("/MATRIX"):
+                      	if (Client.getMATRIX() != null){
+                      		Character[][] MATRIX = Client.getMATRIX();
+	                        	System.out.println("------------");
+	                        	for (int i=0; i<MATRIX.length;i++){
+									String line = "";
+									for (int j = 0; j<MATRIX.length;j++){
+										line = line + (MATRIX[i][j]);
+										if (j!=MATRIX.length-1){
+											line = line + ", ";
+										}
+									}
+									System.out.println(line);
+								}
+								System.out.println("------------");
+                      	}
+                      	else {
+                      		System.out.println("No se ha recibido matriz del servidor");
+                      	}
+                      	break;
+                      	
                       case ("/LIST"):
-                  		LISTCommandMessage list = new LISTCommandMessage();
-                  		try {
-                      		OutBuf.put(list);
-                      	} catch (InterruptedException e) {
-                      		e.printStackTrace();
-                      	}
+                  		mb.listTables();
                       	break;
+                      	
                       case ("/WHO"):
-                    	System.out.println("hola que tal");
-                  		WHOCommandMessage who = new WHOCommandMessage();
-                  		try {
-                      		OutBuf.put(who);
-                      	} catch (InterruptedException e) {
-                      		e.printStackTrace();
-                      	}
+                  		mb.whoTable();
                       	break;
+                      	
                       case ("/QUIT"):
                     	System.out.println("Hasta luego.");
                       	funcionando=false;
                       	break;
+                      	
                       case ("/WORD"):
                       if (data.length>1){
 	                        if (data.length>2){
 	                        	System.out.println("Solo se reconoce "+data[1]+" como palabra");
 	                        }
-	                        WORDCommandMessage word = new WORDCommandMessage(new WordStats(data[1]));
-	                        try {
-								OutBuf.put(word);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}	
+	                        mb.sendWord(data[1]);
                       	}
                       	else {
                       		System.out.println("Debes escribir una palabra.\n" +
@@ -300,12 +293,7 @@ class UserInput extends Thread{
               }
               else{
               	if (funcionando){
-                      WORDCommandMessage word = new WORDCommandMessage(new WordStats(data[0]));
-                      try {
-							OutBuf.put(word);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
+                      mb.sendWord(data[0]);
               	}
               	else {
                       System.out.println("La partida aun no se ha iniciado.");
@@ -457,7 +445,7 @@ class UserOutput extends Thread{
 						}
 						if (msg instanceof SWHOResponseMessage) {
 							int tam = ((SWHOResponseMessage)msg).getNicks().length;
-							System.out.println("Tama�o: " + tam);
+							System.out.println("Tama���o: " + tam);
 							if (tam==1) {
 								System.out.println("El jugador de esta mesa es: " + ((SWHOResponseMessage)msg).getNicks()[0]);
 							}
