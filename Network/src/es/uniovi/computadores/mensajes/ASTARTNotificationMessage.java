@@ -56,6 +56,9 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 	
 	private void parseParams(JSONObject params) {
 		JSONArray jsonArray = (JSONArray) params.get(MATRIX_TAG);
+		if (jsonArray == null) {
+			throw new IllegalArgumentException("The matrix is missing");
+		}
 		if (jsonArray.size() != ROW_COUNT) {
 			throw new IllegalArgumentException("Invalid row count");
 		}
@@ -63,7 +66,10 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 		for (int i = 0; i < ROW_COUNT; i++) {
 			JSONObject rowObject = (JSONObject) jsonArray.get(i);
 			JSONArray row = (JSONArray) rowObject.get(ROW_TAG);
-			if (row.size() != ROW_COUNT) {
+			if (row == null) {
+				throw new IllegalArgumentException("A row is missing");
+			}
+			if (row.size() != COLUMN_COUNT) {
 				throw new IllegalArgumentException("Invalid column count");
 			}
 			for (int j = 0; j < COLUMN_COUNT; j++) {
