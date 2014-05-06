@@ -83,7 +83,7 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 		if ((rowCount < SQUARED_MATRIX_COUNT_MIN) || (rowCount > SQUARED_MATRIX_COUNT_MAX)) {
 			throw new IllegalArgumentException("Invalid row count");
 		}
-	Character [][] matrix = new Character[rowCount][rowCount];
+		Character [][] matrix = new Character[rowCount][rowCount];
 		for (int i = 0; i < rowCount; i++) {
 			JSONObject rowObject = (JSONObject) jsonArray.get(i);
 			JSONArray row = (JSONArray) rowObject.get(ROW_TAG);
