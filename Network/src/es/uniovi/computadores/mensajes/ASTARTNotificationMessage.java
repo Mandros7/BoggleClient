@@ -10,18 +10,26 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 	public static final String SUBTYPE = "start";
 	private static final String MATRIX_TAG = "matrix";
 	private static final String ROW_TAG = "row";
+	private static final String DURATION_TAG = "duration";
 	private static final int SQUARED_MATRIX_COUNT_MIN = 4;
 	private static final int SQUARED_MATRIX_COUNT_MAX = 5;
+	private static final int DEFAULT_DURATION_SECS = 60;
 	
 	private Character [][] mMatrix;
+	private int mDurationSecs;
 	
-	public ASTARTNotificationMessage(Character [][] matrix) {
+	public ASTARTNotificationMessage(Character [][] matrix, int durationSecs) {
 		super(SUBTYPE);
 		if (matrix == null) {
 			throw new IllegalArgumentException("The matrix cannot be null");			
 		}
+		setDurationSecs(durationSecs);
 		testValid(matrix);
 		mMatrix = matrix;
+	}
+	
+	public ASTARTNotificationMessage(Character [][] matrix) {
+		this(matrix, DEFAULT_DURATION_SECS);
 	}
 	
 	ASTARTNotificationMessage(JSONObject params) {
@@ -34,6 +42,17 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 	
 	public Character [][] getMatrix() {
 		return mMatrix;
+	}
+	
+	public int getDurationSecs() {
+		return mDurationSecs;
+	}
+	
+	private void setDurationSecs(int durationSecs) {
+		if (durationSecs <= 0) {
+			throw new IllegalArgumentException("Duration should be greater than 0");
+		}
+		mDurationSecs = durationSecs;
 	}
 			
 	@Override
@@ -51,6 +70,7 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 			matrix.add(row);
 		}		
 		params.put(MATRIX_TAG, matrix);
+		params.put(DURATION_TAG, new Long(mDurationSecs));
 		return params;
 	}
 	
@@ -63,7 +83,7 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 		if ((rowCount < SQUARED_MATRIX_COUNT_MIN) || (rowCount > SQUARED_MATRIX_COUNT_MAX)) {
 			throw new IllegalArgumentException("Invalid row count");
 		}
-		Character [][] matrix = new Character[rowCount][rowCount];
+	Character [][] matrix = new Character[rowCount][rowCount];
 		for (int i = 0; i < rowCount; i++) {
 			JSONObject rowObject = (JSONObject) jsonArray.get(i);
 			JSONArray row = (JSONArray) rowObject.get(ROW_TAG);
@@ -82,6 +102,13 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 			}
 		}
 		mMatrix = matrix;
+		Long value = (Long) params.get(DURATION_TAG);
+		if (value == null) {
+			// Es opcional
+			setDurationSecs(DEFAULT_DURATION_SECS);
+		} else {
+			setDurationSecs(value.intValue());
+		}
 	}
 	
 	private static void testValid(Character [][] matrix) {
