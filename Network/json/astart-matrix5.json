@@ -1,0 +1,13 @@
+{
+	"type" : "notification",
+	"subtype" : "start",
+	"params" : {
+		"matrix" : [
+			{ "row" : [ "A", "B", "C", "D", "P" ] },
+			{ "row" : [ "E", "F", "G", "H", "Q" ] },
+			{ "row" : [ "I", "J", "K", "L", "R" ] },
+			{ "row" : [ "M", "N", "Ñ", "O", "S" ] },
+			{ "row" : [ "T", "U", "V", "W", "X" ] }
+		]
+	}
+}

@@ -10,8 +10,8 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 	public static final String SUBTYPE = "start";
 	private static final String MATRIX_TAG = "matrix";
 	private static final String ROW_TAG = "row";
-	private static final int ROW_COUNT = 4;
-	private static final int COLUMN_COUNT = 4;
+	private static final int SQUARED_MATRIX_COUNT_MIN = 4;
+	private static final int SQUARED_MATRIX_COUNT_MAX = 5;
 	
 	private Character [][] mMatrix;
 	
@@ -59,20 +59,21 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 		if (jsonArray == null) {
 			throw new IllegalArgumentException("The matrix is missing");
 		}
-		if (jsonArray.size() != ROW_COUNT) {
+		int rowCount = jsonArray.size();
+		if ((rowCount < SQUARED_MATRIX_COUNT_MIN) || (rowCount > SQUARED_MATRIX_COUNT_MAX)) {
 			throw new IllegalArgumentException("Invalid row count");
 		}
-		Character [][] matrix = new Character[ROW_COUNT][COLUMN_COUNT];
-		for (int i = 0; i < ROW_COUNT; i++) {
+		Character [][] matrix = new Character[rowCount][rowCount];
+		for (int i = 0; i < rowCount; i++) {
 			JSONObject rowObject = (JSONObject) jsonArray.get(i);
 			JSONArray row = (JSONArray) rowObject.get(ROW_TAG);
 			if (row == null) {
 				throw new IllegalArgumentException("A row is missing");
 			}
-			if (row.size() != COLUMN_COUNT) {
+			if (row.size() != rowCount) {
 				throw new IllegalArgumentException("Invalid column count");
 			}
-			for (int j = 0; j < COLUMN_COUNT; j++) {
+			for (int j = 0; j < rowCount; j++) {
 				String letter = (String) row.get(j);
 				if (letter.length() != 1) {
 					throw new IllegalArgumentException("The matrix can only contain letters");
@@ -84,11 +85,12 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 	}
 	
 	private static void testValid(Character [][] matrix) {
-		if (matrix.length != ROW_COUNT) {
+		int rowCount = matrix.length;
+		if ((rowCount < SQUARED_MATRIX_COUNT_MIN) || (rowCount > SQUARED_MATRIX_COUNT_MAX)) {
 			throw new IllegalArgumentException("Invalid row count");
 		}
-		for (int i = 0; i < ROW_COUNT; i++) {
-			if (matrix[i].length != COLUMN_COUNT) {
+		for (int i = 0; i < rowCount; i++) {
+			if (matrix[i].length != rowCount) {
 				throw new IllegalArgumentException("Invalid column count");
 			}
 		}
