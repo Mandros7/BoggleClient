@@ -15,7 +15,7 @@ public class AENDNotificationMessage extends NotificationMessage {
 	public AENDNotificationMessage(ArrayList<PlayerStats> players) {
 		super(SUBTYPE);
 		if ((players == null) || (players.size() == 0)) {
-			throw new IllegalArgumentException("Invalid nick");
+			throw new IllegalArgumentException("Invalid player stats");
 		}
 		mPlayers = players;
 	}
@@ -46,6 +46,9 @@ public class AENDNotificationMessage extends NotificationMessage {
 	
 	private void parseParams(JSONObject params) {
 		JSONArray array = (JSONArray) params.get(PLAYERS_TAG);
+		if (array == null) {
+			throw new IllegalArgumentException("The player list is missing");
+		}
 		mPlayers = new ArrayList<PlayerStats>(array.size());
 		for (int i = 0; i < array.size(); i++) {
 			JSONObject playerObject = (JSONObject) array.get(i);

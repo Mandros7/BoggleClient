@@ -14,7 +14,7 @@ public class WORDCommandMessage extends CommandMessage {
 		if (word == null) {
 			throw new IllegalArgumentException("The word cannot be null");
 		}
-		mWord = word.getWord();
+		setWord(word.getWord());
 	}
 	
 	WORDCommandMessage(JSONObject params) {
@@ -28,6 +28,13 @@ public class WORDCommandMessage extends CommandMessage {
 	public String getWord() {
 		return mWord;
 	}
+	
+	private void setWord(String word) {
+		if (word == null) {
+			throw new IllegalArgumentException("The word cannot be null");
+		}
+		mWord = word;
+	}
 			
 	@Override
 	@SuppressWarnings("unchecked")
@@ -38,6 +45,6 @@ public class WORDCommandMessage extends CommandMessage {
 	}
 	
 	private void parseParams(JSONObject params) {
-		mWord = (String) params.get(WORD_TAG);
+		setWord((String) params.get(WORD_TAG));
 	}
 }
