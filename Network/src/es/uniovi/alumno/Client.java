@@ -2,11 +2,9 @@ package es.uniovi.alumno;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 //import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
-
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 import es.uniovi.computadores.mensajes.*;
 
@@ -151,6 +149,42 @@ public class Client {
 		return texto;
 	}
 
+	
+public static interface OutputInterface {
+		
+		public void sendCommand(String [] datos);
+		
+		public String printASTART(Character[][] matriz);
+		
+		public String printAEND(ArrayList<PlayerStats> players);
+		
+		public String printAPLAYED(String nick, int length, boolean discoveredPlayed);
+		
+		public String printAJOIN(String nick_usuario);
+		
+		public String printANICK(String new_nick, String old_nick);
+		
+		public String printALEAVE(String nick_leave);
+		
+		public String printSWORD(WordStats StatsPalabra);
+		
+		public String printSJOIN(String table);
+		
+		public String printSLEAVE();
+		
+		public String printSNICK(String nick);
+		
+		public String printSLIST(ArrayList<TableStats> tables);
+		
+		public String printSSTART();
+		
+		public String printSWHO(String[] array_jugadores);
+		
+		public String checkResponse(Message msg);
+		
+		
+	}
+	
 	
 }
 
