@@ -10,18 +10,26 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 	public static final String SUBTYPE = "start";
 	private static final String MATRIX_TAG = "matrix";
 	private static final String ROW_TAG = "row";
-	private static final int ROW_COUNT = 4;
-	private static final int COLUMN_COUNT = 4;
+	private static final String DURATION_TAG = "duration";
+	private static final int SQUARED_MATRIX_COUNT_MIN = 4;
+	private static final int SQUARED_MATRIX_COUNT_MAX = 5;
+	private static final int DEFAULT_DURATION_SECS = 60;
 	
 	private Character [][] mMatrix;
+	private int mDurationSecs;
 	
-	public ASTARTNotificationMessage(Character [][] matrix) {
+	public ASTARTNotificationMessage(Character [][] matrix, int durationSecs) {
 		super(SUBTYPE);
 		if (matrix == null) {
 			throw new IllegalArgumentException("The matrix cannot be null");			
 		}
+		setDurationSecs(durationSecs);
 		testValid(matrix);
 		mMatrix = matrix;
+	}
+	
+	public ASTARTNotificationMessage(Character [][] matrix) {
+		this(matrix, DEFAULT_DURATION_SECS);
 	}
 	
 	ASTARTNotificationMessage(JSONObject params) {
@@ -34,6 +42,17 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 	
 	public Character [][] getMatrix() {
 		return mMatrix;
+	}
+	
+	public int getDurationSecs() {
+		return mDurationSecs;
+	}
+	
+	private void setDurationSecs(int durationSecs) {
+		if (durationSecs <= 0) {
+			throw new IllegalArgumentException("Duration should be greater than 0");
+		}
+		mDurationSecs = durationSecs;
 	}
 			
 	@Override
@@ -51,22 +70,30 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 			matrix.add(row);
 		}		
 		params.put(MATRIX_TAG, matrix);
+		params.put(DURATION_TAG, new Long(mDurationSecs));
 		return params;
 	}
 	
 	private void parseParams(JSONObject params) {
 		JSONArray jsonArray = (JSONArray) params.get(MATRIX_TAG);
-		if (jsonArray.size() != ROW_COUNT) {
+		if (jsonArray == null) {
+			throw new IllegalArgumentException("The matrix is missing");
+		}
+		int rowCount = jsonArray.size();
+		if ((rowCount < SQUARED_MATRIX_COUNT_MIN) || (rowCount > SQUARED_MATRIX_COUNT_MAX)) {
 			throw new IllegalArgumentException("Invalid row count");
 		}
-		Character [][] matrix = new Character[ROW_COUNT][COLUMN_COUNT];
-		for (int i = 0; i < ROW_COUNT; i++) {
+		Character [][] matrix = new Character[rowCount][rowCount];
+		for (int i = 0; i < rowCount; i++) {
 			JSONObject rowObject = (JSONObject) jsonArray.get(i);
 			JSONArray row = (JSONArray) rowObject.get(ROW_TAG);
-			if (row.size() != ROW_COUNT) {
+			if (row == null) {
+				throw new IllegalArgumentException("A row is missing");
+			}
+			if (row.size() != rowCount) {
 				throw new IllegalArgumentException("Invalid column count");
 			}
-			for (int j = 0; j < COLUMN_COUNT; j++) {
+			for (int j = 0; j < rowCount; j++) {
 				String letter = (String) row.get(j);
 				if (letter.length() != 1) {
 					throw new IllegalArgumentException("The matrix can only contain letters");
@@ -75,14 +102,22 @@ public class ASTARTNotificationMessage extends NotificationMessage {
 			}
 		}
 		mMatrix = matrix;
+		Long value = (Long) params.get(DURATION_TAG);
+		if (value == null) {
+			// Es opcional
+			setDurationSecs(DEFAULT_DURATION_SECS);
+		} else {
+			setDurationSecs(value.intValue());
+		}
 	}
 	
 	private static void testValid(Character [][] matrix) {
-		if (matrix.length != ROW_COUNT) {
+		int rowCount = matrix.length;
+		if ((rowCount < SQUARED_MATRIX_COUNT_MIN) || (rowCount > SQUARED_MATRIX_COUNT_MAX)) {
 			throw new IllegalArgumentException("Invalid row count");
 		}
-		for (int i = 0; i < ROW_COUNT; i++) {
-			if (matrix[i].length != COLUMN_COUNT) {
+		for (int i = 0; i < rowCount; i++) {
+			if (matrix[i].length != rowCount) {
 				throw new IllegalArgumentException("Invalid column count");
 			}
 		}

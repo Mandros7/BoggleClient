@@ -15,15 +15,12 @@ public class PlayerStats {
 	private int mScore;
 	private ArrayList<WordStats> mWords;
 
-	public PlayerStats(String nick, int score, ArrayList<WordStats> words) {
-		if (nick == null || nick == "") {
-			throw new IllegalArgumentException("Invalid nick");
-		}
+	public PlayerStats(String nick, int score, ArrayList<WordStats> words) {		
 		if (words == null) {
 			throw new IllegalArgumentException(
 					"The list of words cannot be null");
 		}
-		mNick = nick;
+		setNick(nick);
 		mScore = score;
 		mWords = words;
 	}
@@ -32,9 +29,13 @@ public class PlayerStats {
 		if (json == null) {
 			throw new IllegalArgumentException("The JSON object cannot be null");
 		}
-		mNick = (String) json.get(NICK_TAG);
-		mScore = ((Long) json.get(SCORE_TAG)).intValue();
+		setNick((String) json.get(NICK_TAG));
+		Long value = (Long) json.get(SCORE_TAG); 
 		JSONArray array = (JSONArray) json.get(WORDS_TAG);
+		if ((value == null) || (array == null)) {
+			throw new IllegalArgumentException("Invalid player stats");
+		}
+		mScore = value.intValue();		
 		mWords = new ArrayList<WordStats>(array.size());
 		for (int i = 0; i < array.size(); i++) {
 			JSONObject wordObject = (JSONObject) array.get(i);
@@ -58,6 +59,13 @@ public class PlayerStats {
 
 	public String getNick() {
 		return mNick;
+	}
+	
+	private void setNick(String nick) {
+		if (nick == null || nick == "") {
+			throw new IllegalArgumentException("Invalid nick");
+		}
+		mNick = nick;
 	}
 
 	public int getScore() {
