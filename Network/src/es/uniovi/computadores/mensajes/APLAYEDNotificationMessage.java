@@ -18,11 +18,8 @@ public class APLAYEDNotificationMessage extends NotificationMessage {
 		if (word == null) {
 			throw new IllegalArgumentException("The word cannot be null");
 		}
-		if (nick == null || nick == "") {
-			throw new IllegalArgumentException("Invalid nick");
-		}
-		mNick = nick;
-		mWordLength = word.getWord().length();
+		setNick(nick);
+		setWordLength(word.getWord().length());
 		mAlreadyDiscovered = word.isAlreadyDiscovered();
 	}
 	
@@ -37,9 +34,23 @@ public class APLAYEDNotificationMessage extends NotificationMessage {
 	public String getNick() {
 		return mNick;
 	}
+	
+	private void setNick(String nick) {
+		if (nick == null || nick.equals("")) {
+			throw new IllegalArgumentException("Invalid nick");
+		}
+		mNick = nick;
+	}
 
 	public int getWordLength() {
 		return mWordLength;
+	}
+	
+	private void setWordLength(int length) {
+		if (length < 0) {
+			throw new IllegalArgumentException("Invalid word length");
+		}
+		mWordLength = length;
 	}
 
 	public boolean isAlreadyDiscovered() {
@@ -57,8 +68,13 @@ public class APLAYEDNotificationMessage extends NotificationMessage {
 	}
 	
 	private void parseParams(JSONObject params) {
-		mNick = (String) params.get(NICK_TAG);
-		mWordLength = ((Long) params.get(WORD_LENGTH_TAG)).intValue();
-		mAlreadyDiscovered = (Boolean) params.get(ALREADY_DISCOVERED_TAG);
+		setNick((String) params.get(NICK_TAG));
+		Long value = (Long) params.get(WORD_LENGTH_TAG);
+		Boolean bool = (Boolean) params.get(ALREADY_DISCOVERED_TAG);
+		if ((value == null) || (bool == null)) {
+			throw new IllegalArgumentException("Invalid parameters");
+		}
+		setWordLength(value.intValue());
+		mAlreadyDiscovered = bool;
 	}
 }

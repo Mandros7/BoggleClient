@@ -9,16 +9,25 @@ public class NotificationMessageTest extends TestCase {
 	private static final String NICK = "usuario";
 	private static final String WORD = "peral";
 	private static final boolean ALREADY_DISCOVERED = false;
-	private static final Character[][] MATRIX =
+	private static final Character[][] MATRIX4 =
 		{ 
 			{ 'A', 'B', 'C', 'D' },
 			{ 'E', 'F', 'G', 'H' },
 			{ 'I', 'J', 'K', 'L' },
 			{ 'M', 'N', 'Ñ', 'O' }
 		};
+	private static final Character[][] MATRIX5 =
+		{ 
+			{ 'A', 'B', 'C', 'D', 'P' },
+			{ 'E', 'F', 'G', 'H', 'Q' },
+			{ 'I', 'J', 'K', 'L', 'R' },
+			{ 'M', 'N', 'Ñ', 'O', 'S' },
+			{ 'T', 'U', 'V', 'W', 'X' }
+		};
 	
 	private static final String APLAYED_FILE = "json/aplayed.json";
-	private static final String ASTART_FILE = "json/astart.json";
+	private static final String ASTART4_FILE = "json/astart-matrix4.json";
+	private static final String ASTART5_FILE = "json/astart-matrix5.json";
 	private static final String AEND_FILE = "json/aend.json";
 
 	
@@ -36,15 +45,29 @@ public class NotificationMessageTest extends TestCase {
 		assertEquals(expectedObject, notification.toJSON());
 	}
 	
-	public void testASTARToJSON() {
-		JSONObject expectedObject = Util.loadJSONFromFile(ASTART_FILE);
+	public void testASTAR4ToJSON() {
+		JSONObject expectedObject = Util.loadJSONFromFile(ASTART4_FILE);
 		ASTARTNotificationMessage notification = 
-				new ASTARTNotificationMessage(MATRIX);
+				new ASTARTNotificationMessage(MATRIX4);
 		assertEquals(expectedObject, notification.toJSON());		
 	}
 	
-	public void testASTARTParsing() {
-		JSONObject expectedObject = Util.loadJSONFromFile(ASTART_FILE);
+	public void testASTART4Parsing() {
+		JSONObject expectedObject = Util.loadJSONFromFile(ASTART4_FILE);
+		ASTARTNotificationMessage notification = (ASTARTNotificationMessage)
+				Message.createFromJSON((JSONObject) expectedObject);
+		assertEquals(expectedObject, notification.toJSON());
+	}
+	
+	public void testASTAR5ToJSON() {
+		JSONObject expectedObject = Util.loadJSONFromFile(ASTART5_FILE);
+		ASTARTNotificationMessage notification = 
+				new ASTARTNotificationMessage(MATRIX5);
+		assertEquals(expectedObject, notification.toJSON());		
+	}
+	
+	public void testASTART5Parsing() {
+		JSONObject expectedObject = Util.loadJSONFromFile(ASTART5_FILE);
 		ASTARTNotificationMessage notification = (ASTARTNotificationMessage)
 				Message.createFromJSON((JSONObject) expectedObject);
 		assertEquals(expectedObject, notification.toJSON());
