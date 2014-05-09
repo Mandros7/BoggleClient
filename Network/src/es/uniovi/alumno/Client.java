@@ -42,6 +42,16 @@ public class Client {
 		TABLE = tABLE;
 	}
 
+	static boolean en_ejecucion = true;
+	static boolean astart_recibido = false;
+	final ArrayBlockingQueue<Message> InBuf;
+	final ArrayBlockingQueue<Message> OutBuf;
+	static MessageBuilder mb = new MessageBuilder();
+	
+	public Client(ArrayBlockingQueue<Message> InBuf, ArrayBlockingQueue<Message> OutBuf){
+		this.InBuf = InBuf;
+		this.OutBuf = OutBuf;
+	}
 	
 	public static void main(String[] args) throws InterruptedException, UnknownHostException, IOException {
 		if (args.length!=3){
@@ -53,30 +63,92 @@ public class Client {
 		String IP = args[1];
 		int port = Integer.parseInt(args[2]);
 		Socket socket = new Socket(IP, port); 
-		System.out.println("Funcionando");
 		
+		//LOGGER.setLevel(Level.WARNING);
+		System.out.println("Funcionando");
 		ArrayBlockingQueue<Message> OutBuff = new ArrayBlockingQueue<Message>(10);
 		ArrayBlockingQueue<Message>	InBuff = new ArrayBlockingQueue<Message>(10);
-		UserOutput salidaUsuario = new UserOutput(InBuff);
+		
 		NetOutput salidaRed = new NetOutput(socket,OutBuff);
-	    UserInput entradaUsuario = new UserInput(OutBuff);
 	    NetInput entradaRed = new NetInput(socket, InBuff);
 	    
-	    salidaUsuario.start();
-	    entradaUsuario.start();
+	    Client BC = new Client(InBuff, OutBuff);
+	    //WindowInterface WI = new WindowInterface(BC);
+	    
 	    salidaRed.start();
 	    entradaRed.start();
 	    
-	    NICKCommandMessage init_nick = new NICKCommandMessage(nick);
-	    OutBuff.put(init_nick);
+	    NICKCommandMessage nick_inicial = new NICKCommandMessage(nick);
+	    OutBuff.put(nick_inicial);
 	    
-	    entradaUsuario.join(); 
-	    entradaRed.close();
-	    salidaRed.close();
-	    salidaUsuario.close();
-	    entradaRed.join();
-	    salidaRed.join();
+	    while(en_ejecucion){
+	    
+	    }
 	    socket.close();
+	}
+	
+	
+	public void start() {
+		try {
+			OutBuf.put(mb.CreateStartCommand());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void joinTable(String mesa) {
+		try {
+			OutBuf.put(mb.CreateJoinCommand(mesa));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void changeNick(String nick) {
+		try {
+			OutBuf.put(mb.CreateNickCommand(nick));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void leaveTable() {
+		try {
+			OutBuf.put(mb.CreateLeaveCommand());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void listTables() {
+		try {
+			OutBuf.put(mb.CreateListCommand());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void listTablePlayers() {
+		try {
+			OutBuf.put(mb.CreateWhoCommand());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void wordFound(WordStats word) {
+		try {
+			OutBuf.put(mb.CreateWordCommand(word));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	public String eraseBlanks(String texto) {
+		texto = texto.replaceAll(" +", " ").trim();
+		return texto;
 	}
 
 	
@@ -184,201 +256,6 @@ class NetOutput extends Thread {
 				//e.printStackTrace();
 			}
 		}
-	}
-}
-
-class UserInput extends Thread{
-	// Hilo de entrada por teclado del usuario
-	ArrayBlockingQueue<Message> OutBuf;
-	String input;
-	UserInput(ArrayBlockingQueue<Message> abq){
-		this.OutBuf = abq;
-    }
-
-    public void run() { 
-        boolean funcionando=true;
-    	InputStreamReader isr = new InputStreamReader(System.in);
-		BufferedReader br = new BufferedReader(isr);
-		MessageBuilder mb = new MessageBuilder(OutBuf);
-        while (funcionando){
-        	try {				
-				input = br.readLine();
-				mb.newInput(input);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-          
-      }
-      try {
-		isr.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    }
-}
-
-class UserOutput extends Thread{
-	// Hilo de salida de datos por pantalla
-	ArrayBlockingQueue<Message> InBuf;
-	volatile boolean en_ejecucion = true;
-
-	public void close(){
-		en_ejecucion = false;
-		this.interrupt();
-	}
-	UserOutput(ArrayBlockingQueue<Message> InBuf){
-		this.InBuf = InBuf;
-	}
-	public void run() {
-		while (en_ejecucion){
-			try {
-				Message msg = InBuf.take();
-				if (msg instanceof NotificationMessage) {
-					if (msg instanceof ASTARTNotificationMessage){
-						System.out.println("Se ha iniciado la partida");
-						System.out.println("------------");
-						Character[][] MATRIX = ((ASTARTNotificationMessage) msg).getMatrix();
-						Client.setMATRIX(MATRIX);
-						for (int i=0; i<MATRIX.length;i++){
-							String line = "";
-							for (int j = 0; j<MATRIX.length;j++){
-								line = line + (MATRIX[i][j]);
-								if (j!=MATRIX.length-1){
-									line = line + ", ";
-								}
-							}
-							System.out.println(line);
-						}
-						System.out.println("------------");
-					}
-					if (msg instanceof APLAYEDNotificationMessage){
-						String nick = ((APLAYEDNotificationMessage) msg).getNick();
-						int length = ((APLAYEDNotificationMessage) msg).getWordLength();
-						boolean discoveredPlayed = ((APLAYEDNotificationMessage) msg).isAlreadyDiscovered();
-						if (!discoveredPlayed){
-							System.out.println("El jugador "+nick+" ha encontrado una nueva palabra de "+length+" letras.");
-						}
-						else{
-							System.out.println("El jugador "+nick+" ha encontrado una palabra de "+length+" letras que ya habia sido descubierta.");
-						}
-					}
-					if (msg instanceof AENDNotificationMessage) {
-						int i = 0;
-						while (i<((AENDNotificationMessage)msg).getPlayers().size()) {
-							System.out.println("El jugador " +
-									((AENDNotificationMessage)msg).getPlayers().get(i).getNick() +
-										" ha obtenido una puntuacion de " +
-										((AENDNotificationMessage)msg).getPlayers().get(i).getScore() + " puntos");
-							i++;
-						}
-					}
-					if (msg instanceof AJOINNotificationMessage) {
-						String nick_usuario = ((AJOINNotificationMessage)msg).getNick();
-						System.out.println("El usuario " +
-								nick_usuario +
-									" se ha unido a la mesa");
-					}
-					if (msg instanceof ANICKNotificationMessage) {
-						String new_nick = ((ANICKNotificationMessage)msg).getNewNick();
-						String old_nick = ((ANICKNotificationMessage)msg).getOldNick();
-						System.out.println("El usuario " +
-								old_nick +
-									" ha cambiado su nick por " +
-										new_nick);
-					}
-					if (msg instanceof ALEAVENotificationMessage) {
-						String nick_leave = ((ALEAVENotificationMessage)msg).getNick();
-						System.out.println("El usuario " +
-								nick_leave +
-									" ha abandonado la mesa.");
-					}
-				}
-				if (msg instanceof ResponseMessage){
-					if (((ResponseMessage) msg).isError()){
-						String error = ((ResponseMessage) msg).getErrorDescription();
-						System.out.println("ERROR: "+error);
-					}
-					else{
-						if (msg instanceof SWORDResponseMessage){
-							WordStats StatsPalabra = ((SWORDResponseMessage) msg).getWord();
-							String word = StatsPalabra.getWord();
-							boolean discoveredResponse = StatsPalabra.isAlreadyDiscovered();
-							if (!discoveredResponse){
-								System.out.println("Se ha registrado la siguiente palabra nueva: "+word);
-							}
-							else {
-								System.out.println("La palabra "+word+" ya existia.");
-							}
-						}
-						if (msg instanceof SJOINResponseMessage) {
-							String mesa = ((SJOINResponseMessage)msg).getTable();
-							System.out.println("Te has unido a la mesa " + mesa);
-							Client.setTABLE(mesa);
-						}
-						if (msg instanceof SLEAVEResponseMessage) {
-							System.out.println("Has abadonado la mesa.");
-							Client.setTABLE("Ninguna");
-						}
-						if (msg instanceof SNICKResponseMessage) {
-							String nick = ((SNICKResponseMessage)msg).getNick();
-							System.out.println("Tu nuevo nick es: " + nick);
-							Client.setNICK(nick);
-							//VARIABLE NICK
-						}
-						if (msg instanceof SLISTResponseMessage) {
-							String anadido;
-							int tam = ((SLISTResponseMessage)msg).getTables().size();
-							
-							for (int i=0; i<tam; i++) {
-								String info_tables = "En la mesa " +
-										((SLISTResponseMessage)msg).getTables().get(i).getName() +
-											" hay " +
-											((SLISTResponseMessage)msg).getTables().get(i).getPlayerCount() +
-												" jugadores ";
-								if (((SLISTResponseMessage)msg).getTables().get(i).getAlreadyPlaying()) {
-									anadido = " y la partida ya se ha iniciado.";
-								}
-								else {
-									anadido = " y la partida aun no se ha iniciado";
-								}
-								System.out.println(info_tables + anadido);
-							}
-							
-						}
-						if (msg instanceof SSTARTResponseMessage){
-							System.out.println("Esperando al resto de jugadores...");
-						}
-						if (msg instanceof SWHOResponseMessage) {
-							int tam = ((SWHOResponseMessage)msg).getNicks().length;
-							System.out.println("Tama���o: " + tam);
-							if (tam==1) {
-								System.out.println("El jugador de esta mesa es: " + ((SWHOResponseMessage)msg).getNicks()[0]);
-							}
-							else {
-								String players = "Los jugadores de esta mesa son: ";
-								for (int i=0; i<tam; i++) {
-									if (i==0) {
-										players = players + ((SWHOResponseMessage)msg).getNicks()[i];
-									}
-									else if (i==tam-1) {
-										players = players + " y " + ((SWHOResponseMessage)msg).getNicks()[i];
-									}
-									else {
-										players = players + ", " + ((SWHOResponseMessage)msg).getNicks()[i];
-									}
-								}
-								System.out.println(players);
-							}
-							
-						}
-					}
-				}
-				
-				
-			} catch (InterruptedException e) {
-				//e.printStackTrace();
-			}
-            System.out.print("["+Client.getTABLE()+"]"+Client.getNICK()+"> ");}
 	}
 }
 
