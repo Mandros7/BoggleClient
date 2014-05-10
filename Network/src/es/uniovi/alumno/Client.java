@@ -51,6 +51,7 @@ public class Client {
 		this.OutBuf = OutBuf;
 	}
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) throws InterruptedException, UnknownHostException, IOException {
 		if (args.length!=3){
 			System.out.println("Client <NICK> <IP> <PORT>");
