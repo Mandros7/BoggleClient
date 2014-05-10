@@ -71,7 +71,7 @@ public class Client {
 	    NetInput entradaRed = new NetInput(socket, InBuff);
 	    
 	    Client BC = new Client(InBuff, OutBuff);
-	    //WindowInterface WI = new WindowInterface(BC);
+	    WindowInterface WI = new WindowInterface(BC);
 	    
 	    salidaRed.start();
 	    entradaRed.start();
