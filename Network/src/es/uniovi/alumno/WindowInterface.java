@@ -8,7 +8,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
-import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -35,7 +34,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	
 	/*
 	 * Esta interfaz tiene botones en una matriz sobre los que se puede actuar al 
-	 * iniciar la partida. Al hacer clic sobre ellos se a��aden a la linea de comandos 
+	 * iniciar la partida. Al hacer clic sobre ellos se a������aden a la linea de comandos 
 	 * para enviar una palabra. 
 	 * El contenido de los botones se actualiza al recibir la confirmacion de inicio de juego
 	 * 
@@ -77,9 +76,9 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	private JButton fourThree;
 	private JButton fourFour;
 	private JButton[][] butonlar;
-
 	
 	public static Client bc;
+	private JButton btnStart;
 	
 	public static void main(final String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -96,7 +95,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 								
 									try {
 										Message msg = bc.InBuf.take();
-										window.CheckIfASTART(msg);
+										window.textMessages.append(window.checkResponse(msg)+"\n");
 									} catch (InterruptedException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
@@ -205,13 +204,18 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			butonlar= new JButton[4][4];
 			GridBagLayout gbl_matrixPanel = new GridBagLayout();
 			gbl_matrixPanel.columnWidths = new int[]{38, 75, 75, 75, 75, 0};
-			gbl_matrixPanel.rowHeights = new int[]{29, 29, 29, 29, 0};
+			gbl_matrixPanel.rowHeights = new int[]{29, 29, 29, 29, 0, 0, 0};
 			gbl_matrixPanel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-			gbl_matrixPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+			gbl_matrixPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 			matrixPanel.setLayout(gbl_matrixPanel);
 			
 			
-			oneOne = new JButton("A");
+			oneOne = new JButton(" ");
+			oneOne.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					commandInputField.setText(commandInputField.getText()+oneOne.getText());
+				}
+			});
 			oneOne.setEnabled(false);
 			GridBagConstraints gbc_oneOne = new GridBagConstraints();
 			gbc_oneOne.anchor = GridBagConstraints.NORTHWEST;
@@ -221,7 +225,12 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			matrixPanel.add(oneOne, gbc_oneOne);
 			butonlar[0][0]=oneOne;
 			
-			oneTwo = new JButton("B");
+			oneTwo = new JButton(" ");
+			oneTwo.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					commandInputField.setText(commandInputField.getText()+oneTwo.getText());
+				}
+			});
 			oneTwo.setEnabled(false);
 			GridBagConstraints gbc_oneTwo = new GridBagConstraints();
 			gbc_oneTwo.anchor = GridBagConstraints.NORTHWEST;
@@ -231,7 +240,12 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			matrixPanel.add(oneTwo, gbc_oneTwo);
 			butonlar[0][1]=oneTwo;
 			
-			oneThree = new JButton("C");
+			oneThree = new JButton(" ");
+			oneThree.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					commandInputField.setText(commandInputField.getText()+oneThree.getText());
+				}
+			});
 			oneThree.setEnabled(false);
 			GridBagConstraints gbc_oneThree = new GridBagConstraints();
 			gbc_oneThree.anchor = GridBagConstraints.NORTHWEST;
@@ -241,7 +255,12 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			matrixPanel.add(oneThree, gbc_oneThree);
 			butonlar[0][2]=oneThree;
 			
-			oneFour = new JButton("D");
+			oneFour = new JButton(" ");
+			oneFour.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					commandInputField.setText(commandInputField.getText()+oneFour.getText());
+				}
+			});
 			oneFour.setEnabled(false);
 			GridBagConstraints gbc_oneFour = new GridBagConstraints();
 			gbc_oneFour.anchor = GridBagConstraints.NORTHWEST;
@@ -251,7 +270,12 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			matrixPanel.add(oneFour, gbc_oneFour);
 			butonlar[0][3]=oneFour;
 			
-			twoOne = new JButton("E");
+			twoOne = new JButton(" ");
+			twoOne.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					commandInputField.setText(commandInputField.getText()+twoOne.getText());
+				}
+			});
 			twoOne.setEnabled(false);
 			GridBagConstraints gbc_twoOne = new GridBagConstraints();
 			gbc_twoOne.anchor = GridBagConstraints.NORTHWEST;
@@ -261,7 +285,12 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			matrixPanel.add(twoOne, gbc_twoOne);
 			butonlar[1][0]=twoOne;
 			
-			twoTwo = new JButton("F");
+			twoTwo = new JButton(" ");
+			twoTwo.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					commandInputField.setText(commandInputField.getText()+twoTwo.getText());
+				}
+			});
 			twoTwo.setEnabled(false);
 			GridBagConstraints gbc_twoTwo = new GridBagConstraints();
 			gbc_twoTwo.anchor = GridBagConstraints.NORTHWEST;
@@ -271,7 +300,12 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			matrixPanel.add(twoTwo, gbc_twoTwo);
 			butonlar[1][1]=twoTwo;
 			
-			twoThree = new JButton("G");
+			twoThree = new JButton(" ");
+			twoThree.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					commandInputField.setText(commandInputField.getText()+twoThree.getText());
+				}
+			});
 			twoThree.setEnabled(false);
 			GridBagConstraints gbc_twoThree = new GridBagConstraints();
 			gbc_twoThree.anchor = GridBagConstraints.NORTHWEST;
@@ -281,7 +315,12 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			matrixPanel.add(twoThree, gbc_twoThree);
 			butonlar[1][2]=twoThree;
 						
-						twoFour = new JButton("H");
+						twoFour = new JButton(" ");
+						twoFour.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								commandInputField.setText(commandInputField.getText()+twoFour.getText());
+							}
+						});
 						twoFour.setEnabled(false);
 						GridBagConstraints gbc_twoFour = new GridBagConstraints();
 						gbc_twoFour.anchor = GridBagConstraints.NORTHWEST;
@@ -291,7 +330,12 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 						matrixPanel.add(twoFour, gbc_twoFour);
 						butonlar[1][3]=twoFour;
 			
-						threeOne = new JButton("I");
+						threeOne = new JButton(" ");
+						threeOne.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								commandInputField.setText(commandInputField.getText()+threeOne.getText());
+							}
+						});
 						threeOne.setEnabled(false);
 						GridBagConstraints gbc_threeOne = new GridBagConstraints();
 						gbc_threeOne.anchor = GridBagConstraints.NORTHWEST;
@@ -301,7 +345,13 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 						matrixPanel.add(threeOne, gbc_threeOne);
 						butonlar[2][0]=threeOne;
 			
-			threeTwo = new JButton("J");
+			threeTwo = new JButton(" ");
+			threeTwo.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					commandInputField.setText(commandInputField.getText()+threeTwo.getText());
+
+				}
+			});
 			threeTwo.setEnabled(false);
 			GridBagConstraints gbc_threeTwo = new GridBagConstraints();
 			gbc_threeTwo.anchor = GridBagConstraints.NORTHWEST;
@@ -311,7 +361,13 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			matrixPanel.add(threeTwo, gbc_threeTwo);
 			butonlar[2][1]=threeTwo;
 			
-			threeThree = new JButton("K");
+			threeThree = new JButton(" ");
+			threeThree.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					commandInputField.setText(commandInputField.getText()+threeThree.getText());
+
+				}
+			});
 			threeThree.setEnabled(false);
 			GridBagConstraints gbc_threeThree = new GridBagConstraints();
 			gbc_threeThree.anchor = GridBagConstraints.NORTHWEST;
@@ -321,7 +377,13 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			matrixPanel.add(threeThree, gbc_threeThree);
 			butonlar[2][2]=threeThree;
 						
-						threeFour = new JButton("L");
+						threeFour = new JButton(" ");
+						threeFour.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								commandInputField.setText(commandInputField.getText()+threeFour.getText());
+
+							}
+						});
 						threeFour.setEnabled(false);
 						GridBagConstraints gbc_threeFour = new GridBagConstraints();
 						gbc_threeFour.anchor = GridBagConstraints.NORTHWEST;
@@ -331,46 +393,86 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 						matrixPanel.add(threeFour, gbc_threeFour);
 						butonlar[2][3]=threeFour;
 						
-						fourOne = new JButton("M");
+						fourOne = new JButton(" ");
+						fourOne.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								commandInputField.setText(commandInputField.getText()+fourOne.getText());
+
+							}
+						});
 						fourOne.setEnabled(false);
 						GridBagConstraints gbc_fourOne = new GridBagConstraints();
 						gbc_fourOne.anchor = GridBagConstraints.NORTHWEST;
-						gbc_fourOne.insets = new Insets(0, 0, 0, 5);
+						gbc_fourOne.insets = new Insets(0, 0, 5, 5);
 						gbc_fourOne.gridx = 1;
 						gbc_fourOne.gridy = 3;
 						matrixPanel.add(fourOne, gbc_fourOne);
 						butonlar[3][0]=fourOne;
 						
-						fourTwo = new JButton("N");
+						fourTwo = new JButton(" ");
+						fourTwo.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								commandInputField.setText(commandInputField.getText()+fourTwo.getText());
+
+							}
+						});
 						fourTwo.setEnabled(false);
 						GridBagConstraints gbc_fourTwo = new GridBagConstraints();
 						gbc_fourTwo.anchor = GridBagConstraints.NORTHWEST;
-						gbc_fourTwo.insets = new Insets(0, 0, 0, 5);
+						gbc_fourTwo.insets = new Insets(0, 0, 5, 5);
 						gbc_fourTwo.gridx = 2;
 						gbc_fourTwo.gridy = 3;
 						matrixPanel.add(fourTwo, gbc_fourTwo);
 						butonlar[3][1]=fourTwo;
 						
 									
-									fourThree = new JButton("O");
+									fourThree = new JButton(" ");
+									fourThree.addActionListener(new ActionListener() {
+										public void actionPerformed(ActionEvent e) {
+											commandInputField.setText(commandInputField.getText()+fourThree.getText());
+
+										}
+									});
 									fourThree.setEnabled(false);
 									GridBagConstraints gbc_fourThree = new GridBagConstraints();
 									gbc_fourThree.anchor = GridBagConstraints.NORTHWEST;
-									gbc_fourThree.insets = new Insets(0, 0, 0, 5);
+									gbc_fourThree.insets = new Insets(0, 0, 5, 5);
 									gbc_fourThree.gridx = 3;
 									gbc_fourThree.gridy = 3;
 									matrixPanel.add(fourThree, gbc_fourThree);
 									butonlar[3][2]=fourThree;
 			
 						
-						fourFour = new JButton("P");
+						fourFour = new JButton(" ");
+						fourFour.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								commandInputField.setText(commandInputField.getText()+fourFour.getText());
+
+							}
+						});
 						fourFour.setEnabled(false);
 						GridBagConstraints gbc_fourFour = new GridBagConstraints();
+						gbc_fourFour.insets = new Insets(0, 0, 5, 0);
 						gbc_fourFour.anchor = GridBagConstraints.NORTHWEST;
 						gbc_fourFour.gridx = 4;
 						gbc_fourFour.gridy = 3;
 						matrixPanel.add(fourFour, gbc_fourFour);
 						butonlar[3][3]=fourFour;
+						
+						btnStart = new JButton("INICIAR PARTIDA");
+						btnStart.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								bc.start();
+							}
+						});
+						btnStart.setEnabled(false);
+						GridBagConstraints gbc_btnStart = new GridBagConstraints();
+						gbc_btnStart.gridwidth = 2;
+						gbc_btnStart.insets = new Insets(0, 0, 0, 5);
+						gbc_btnStart.gridx = 2;
+						gbc_btnStart.gridy = 5;
+						matrixPanel.add(btnStart, gbc_btnStart);
+						
 			
 		
 	}
@@ -391,26 +493,27 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 		}
 		txtASTART = txtASTART + "------------";
 		Client.astart_recibido = true;
-		refreshMatrix(true);
+		refreshMatrix();
 		return txtASTART;
 	}
 	
-	private void CheckIfASTART(Message msg) {
-		if (msg instanceof ASTARTNotificationMessage) {
-			Client.setMATRIX(((ASTARTNotificationMessage)msg).getMatrix());
-			refreshMatrix(true);
-		}
-		else {
-			textMessages.append(checkResponse(msg)+"\n");
-		}
-	}
-	
-	private void refreshMatrix(boolean activate) {
+	private void refreshMatrix() {
 		Character[][] matrix = Client.getMATRIX();
 		for (int i = 0; i < butonlar.length; i++) {
 			for (int j = 0; j < butonlar[i].length; j++) {
 				butonlar[i][j].setText(Character.toString(matrix[i][j]));
-				butonlar[i][j].setEnabled(activate);
+				butonlar[i][j].setEnabled(true);
+			}
+			
+		}
+		
+	}
+	
+	private void cleanMatrix() {
+		for (int i = 0; i < butonlar.length; i++) {
+			for (int j = 0; j < butonlar[i].length; j++) {
+				butonlar[i][j].setText(" ");
+				butonlar[i][j].setEnabled(false);
 			}
 			
 		}
@@ -420,8 +523,8 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	public String printAEND(ArrayList<PlayerStats> players) {
 		int i = 0;
 		String txtAEND = "La partida ha terminado.\n";
-		refreshMatrix(false);
-//		btnStart.setEnabled(true);
+		cleanMatrix();
+		btnStart.setEnabled(true);
 		while (i<players.size()) {
 			txtAEND = txtAEND + "El jugador " +
 					players.get(i).getNick() +
@@ -469,6 +572,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	}
 	
 	public String printSJOIN(String table) {
+		btnStart.setEnabled(true);
 		String txtSJOIN = "Te has unido a la mesa " + table;
 		TableLabel.setText(table);
 		
@@ -477,6 +581,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	
 	public String printSLEAVE() {
 		String txtSLEAVE = "Has abadonado la mesa.";
+		btnStart.setEnabled(false);
 		Client.setTABLE("Ninguna");
 		return txtSLEAVE;
 	}
@@ -516,6 +621,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	
 	public String printSSTART() {
 		String txtSSTART = "Esperando al resto de jugadores...";
+		btnStart.setEnabled(false);
 		return txtSSTART;
 	}
 	
