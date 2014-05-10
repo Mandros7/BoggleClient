@@ -96,7 +96,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 								
 									try {
 										Message msg = bc.InBuf.take();
-										window.textMessages.append(window.checkResponse(msg)+"\n");
+										window.CheckIfASTART(msg);
 									} catch (InterruptedException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
@@ -393,6 +393,16 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 		Client.astart_recibido = true;
 		refreshMatrix(true);
 		return txtASTART;
+	}
+	
+	private void CheckIfASTART(Message msg) {
+		if (msg instanceof ASTARTNotificationMessage) {
+			Client.setMATRIX(((ASTARTNotificationMessage)msg).getMatrix());
+			refreshMatrix(true);
+		}
+		else {
+			textMessages.append(checkResponse(msg)+"\n");
+		}
 	}
 	
 	private void refreshMatrix(boolean activate) {
