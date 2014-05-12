@@ -45,10 +45,16 @@ public class Client {
 	final ArrayBlockingQueue<Message> OutBuf;
 	static ArrayBlockingQueue<String> QuitBuf = new ArrayBlockingQueue<String>(10);
 	static MessageBuilder mb = new MessageBuilder();
+	NetInput netInput;
+	NetOutput netOutput;
+	Socket socket;
 	
-	public Client(ArrayBlockingQueue<Message> InBuf, ArrayBlockingQueue<Message> OutBuf){
+	public Client(ArrayBlockingQueue<Message> InBuf, ArrayBlockingQueue<Message> OutBuf, NetInput netInput, NetOutput netOutput, Socket socket){
 		this.InBuf = InBuf;
 		this.OutBuf = OutBuf;
+		this.netInput = netInput;
+		this.netOutput = netOutput;
+		this.socket = socket;
 	}
 	
 	@SuppressWarnings("unused")
@@ -68,21 +74,17 @@ public class Client {
 		ArrayBlockingQueue<Message> OutBuff = new ArrayBlockingQueue<Message>(10);
 		ArrayBlockingQueue<Message>	InBuff = new ArrayBlockingQueue<Message>(10);
 		
-		NetOutput salidaRed = new NetOutput(socket,OutBuff);
-	    NetInput entradaRed = new NetInput(socket, InBuff);
+		NetOutput netOutput = new NetOutput(socket,OutBuff);
+	    NetInput netInput = new NetInput(socket, InBuff);
 	    
-	    Client BC = new Client(InBuff, OutBuff);
+	    Client BC = new Client(InBuff, OutBuff, netInput, netOutput, socket);
 	    WindowInterface WI = new WindowInterface(BC);
 	    
-	    salidaRed.start();
-	    entradaRed.start();
+	    netOutput.start();
+	    netInput.start();
 	    
 	    BC.changeNick(nick);
-	    
-	    while(en_ejecucion){
-	    
-	    }
-	    socket.close();
+	   
 	}
 	
 	public void quitGame() {
