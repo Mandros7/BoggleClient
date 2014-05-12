@@ -28,6 +28,7 @@ import es.uniovi.alumno.Client;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.io.IOException;
 
 public class WindowInterface extends JFrame implements Client.OutputInterface {
 	
@@ -105,6 +106,14 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 									}
 								}
 							}
+							try {
+								bc.netInput.close();
+								bc.netOutput.close();
+								bc.socket.close();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							window.frame.dispose();
 						}
 					};
 					
