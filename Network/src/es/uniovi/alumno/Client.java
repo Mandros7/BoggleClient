@@ -1,7 +1,6 @@
 package es.uniovi.alumno;
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -41,50 +40,56 @@ public class Client {
 
 	static boolean en_ejecucion = true;
 	static boolean astart_recibido = false;
-	final ArrayBlockingQueue<Message> InBuf;
-	final ArrayBlockingQueue<Message> OutBuf;
 	static ArrayBlockingQueue<String> QuitBuf = new ArrayBlockingQueue<String>(10);
 	static MessageBuilder mb = new MessageBuilder();
-	NetInput netInput;
-	NetOutput netOutput;
-	Socket socket;
+	private WindowInterface mWindowInterface;
+	private NetOutput netOutput;
+	private NetInput netInput;
+	private ArrayBlockingQueue<Message> OutBuff;
+	private ArrayBlockingQueue<Message> InBuff;
+	private Socket sock;
 	
-	public Client(ArrayBlockingQueue<Message> InBuf, ArrayBlockingQueue<Message> OutBuf, NetInput netInput, NetOutput netOutput, Socket socket){
-		this.InBuf = InBuf;
-		this.OutBuf = OutBuf;
-		this.netInput = netInput;
-		this.netOutput = netOutput;
-		this.socket = socket;
-	}
-	
-	@SuppressWarnings("unused")
-	public static void main(String[] args) throws InterruptedException, UnknownHostException, IOException {
-		if (args.length!=3){
-			System.out.println("Client <NICK> <IP> <PORT>");
-			return;
-		}
+	public Client(Socket socket, String nick) throws IOException{
 		
-		String nick = args[0];
-		String IP = args[1];
-		int port = Integer.parseInt(args[2]);
-		Socket socket = new Socket(IP, port); 
-		
-		//LOGGER.setLevel(Level.WARNING);
-		System.out.println("Funcionando");
-		ArrayBlockingQueue<Message> OutBuff = new ArrayBlockingQueue<Message>(10);
-		ArrayBlockingQueue<Message>	InBuff = new ArrayBlockingQueue<Message>(10);
-		
-		NetOutput netOutput = new NetOutput(socket,OutBuff);
-	    NetInput netInput = new NetInput(socket, InBuff);
-	    
-	    Client BC = new Client(InBuff, OutBuff, netInput, netOutput, socket);
-	    WindowInterface WI = new WindowInterface(BC);
+		this.sock = socket;
+		OutBuff = new ArrayBlockingQueue<Message>(10);
+		InBuff = new ArrayBlockingQueue<Message>(10);
+
+	    @SuppressWarnings("unused")
+		WindowInterface WI = new WindowInterface(this,nick);
+		netOutput = new NetOutput(socket,OutBuff);
+	    netInput = new NetInput(socket, InBuff);
 	    
 	    netOutput.start();
 	    netInput.start();
 	    
-	    BC.changeNick(nick);
-	   
+		takeMessages();
+		
+		netOutput.close();
+		netInput.close();
+		sock.close();
+		
+		mWindowInterface.frame.dispose();
+		
+	}
+	
+
+	
+	public void takeMessages(){
+		while (Client.en_ejecucion){
+					
+					if (CheckIfQuit()) {
+						Client.en_ejecucion = false;
+					}
+					else {
+						try {
+							Message msg = InBuff.take();
+							checkResponse(msg);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
 	}
 	
 	public void quitGame() {
@@ -120,19 +125,19 @@ public class Client {
 		return false;
 	}
 	
-	public void start() {
+	protected void start() {
 		try {
 			NoQuitPufBuf();
-			OutBuf.put(mb.CreateStartCommand());
+			OutBuff.put(mb.CreateStartCommand());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void joinTable(String mesa) {
+	private void joinTable(String mesa) {
 		try {
 			NoQuitPufBuf();
-			OutBuf.put(mb.CreateJoinCommand(mesa));
+			OutBuff.put(mb.CreateJoinCommand(mesa));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -141,43 +146,43 @@ public class Client {
 	public void changeNick(String nick) {
 		try {
 			NoQuitPufBuf();
-			OutBuf.put(mb.CreateNickCommand(nick));
+			OutBuff.put(mb.CreateNickCommand(nick));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void leaveTable() {
+	private void leaveTable() {
 		try {
 			NoQuitPufBuf();
-			OutBuf.put(mb.CreateLeaveCommand());
+			OutBuff.put(mb.CreateLeaveCommand());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void listTables() {
+	private void listTables() {
 		try {
 			NoQuitPufBuf();
-			OutBuf.put(mb.CreateListCommand());
+			OutBuff.put(mb.CreateListCommand());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void listTablePlayers() {
+	private void listTablePlayers() {
 		try {
 			NoQuitPufBuf();
-			OutBuf.put(mb.CreateWhoCommand());
+			OutBuff.put(mb.CreateWhoCommand());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void wordFound(WordStats word) {
+	private void wordFound(WordStats word) {
 		try {
 			NoQuitPufBuf();
-			OutBuf.put(mb.CreateWordCommand(word));
+			OutBuff.put(mb.CreateWordCommand(word));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -189,43 +194,213 @@ public class Client {
 		texto = texto.replaceAll(" +", " ").trim();
 		return texto;
 	}
-
 	
-public static interface OutputInterface {
-		
-		public void sendCommand(String [] datos);
-		
-		public String printASTART(Character[][] matriz);
-		
-		public String printAEND(ArrayList<PlayerStats> players);
-		
-		public String printAPLAYED(String nick, int length, boolean discoveredPlayed);
-		
-		public String printAJOIN(String nick_usuario);
-		
-		public String printANICK(String new_nick, String old_nick);
-		
-		public String printALEAVE(String nick_leave);
-		
-		public String printSWORD(WordStats StatsPalabra);
-		
-		public String printSJOIN(String table);
-		
-		public String printSLEAVE();
-		
-		public String printSNICK(String nick);
-		
-		public String printSLIST(ArrayList<TableStats> tables);
-		
-		public String printSSTART();
-		
-		public String printSWHO(String[] array_jugadores);
-		
-		public String checkResponse(Message msg);
-		
-		
+	public void sendCommand(String[] datos) {
+		String[] comandos = {"start","join","nick","leave","word","list","who","quit"};
+		boolean com_incom = false;
+		if (datos!=null){
+			if (datos[0].charAt(0)=='/') {
+	        	datos[0] = datos[0].toUpperCase();
+	        	
+	        	switch (datos[0]) {
+	        	case ("/START"):
+					start();
+					break;
+	        	case ("/NICK"):
+	         		if (datos.length!=2) {
+	         			mWindowInterface.printError("Numero de arumentos incorrecto.\n" +
+	         					"Formato: /nick <nick>"+"\n");
+	         		}
+	         		else {
+	         			changeNick(datos[1]);
+	         		}
+	          		break;
+	         	case ("/JOIN"):
+	         		if (datos.length!=2) {
+	         			mWindowInterface.printError("Numero de arumentos incorrecto.\n" +
+	         					"Formato: /join <mesa>"+"\n");
+	         		}
+	         		else {
+	            		joinTable(datos[1]);
+	         		}
+	          		break;
+	         	case ("/LEAVE"):
+	 				leaveTable();
+	          		break;
+	         	case ("/LIST"):
+	      			listTables();
+	      			break;
+	         	case ("/WHO"):
+	          		listTablePlayers();
+	              	break;
+	         	case ("/QUIT"):
+	         		quitGame();
+	          		break;
+	         	case ("/WORD"):
+	         		if (datos.length>1){
+	         			if (datos.length>2){
+	         				mWindowInterface.printError("Solo se reconoce "+datos[1]+" como palabra"+"\n");
+	         			}
+	         			if (datos[1].length()<3) {
+	         				mWindowInterface.printError("Longitud minima: 3 caracteres."+"\n");
+	         			}
+	         			else {
+	         				wordFound(new WordStats(datos[1]));
+	         			}
+	         		}
+	         		else {
+	         			mWindowInterface.printError("Debes escribir una palabra.\n" +
+	         					"Formato: /word <palabra>"+"\n");
+	         		}
+	          		break;
+	         	default:
+	         		mWindowInterface.printError("Has introducido un comando incorrecto."+"\n");
+	         		break;
+	        	}
+	        }
+			 //El usuario escribe una palabra
+	        else {
+	        	//Para comprobar si el usuario escribio el comando sin /
+	        	for (int i=0; i<comandos.length; i++) {
+					if (datos[0].equals(comandos[i])) {
+						com_incom = true;
+					}
+				}
+				if (com_incom) {
+					mWindowInterface.printError("Has escrito el comando sin \"/\"."+"\n");
+					com_incom = false;
+				}
+				else {
+					if (datos.length>1){
+						mWindowInterface.printError("Solo se reconoce \""+datos[0]+"\" como palabra"+"\n");
+	     			}
+	     			if (datos[0].length()<3) {
+	     				mWindowInterface.printError("Longitud minima: 3 caracteres."+"\n");
+	     			}
+	     			else {
+	     				wordFound(new WordStats(datos[0]));
+	     			}
+				}
+	        }
+		}
 	}
 	
+private void checkResponse(Message msg) {
+			String mesa = Client.getTABLE();
+			if (mWindowInterface!=null){
+				if (msg instanceof NotificationMessage) {
+					if (msg instanceof ASTARTNotificationMessage){
+						mWindowInterface.printASTART(((ASTARTNotificationMessage)msg).getMatrix());
+					}
+					if (msg instanceof APLAYEDNotificationMessage){
+						String nick = ((APLAYEDNotificationMessage) msg).getNick();
+						int length = ((APLAYEDNotificationMessage) msg).getWordLength();
+						boolean discoveredPlayed = ((APLAYEDNotificationMessage) msg).isAlreadyDiscovered();
+						mWindowInterface.printAPLAYED(nick,length,discoveredPlayed);;
+						
+					}
+					if (msg instanceof AENDNotificationMessage) {
+						mWindowInterface.printAEND(((AENDNotificationMessage)msg).getPlayers());
+					}
+					if (msg instanceof AJOINNotificationMessage) {
+						String nick_usuario = ((AJOINNotificationMessage)msg).getNick();
+			
+						mWindowInterface.printAJOIN(nick_usuario);
+					}
+					if (msg instanceof ANICKNotificationMessage) {
+						String new_nick = ((ANICKNotificationMessage)msg).getNewNick();
+						String old_nick = ((ANICKNotificationMessage)msg).getOldNick();
+						
+						mWindowInterface.printANICK(new_nick,old_nick);
+					}
+					if (msg instanceof ALEAVENotificationMessage) {
+						String nick_leave = ((ALEAVENotificationMessage)msg).getNick();
+			
+						mWindowInterface.printALEAVE(nick_leave);
+					}
+					
+				}
+				if (msg instanceof ResponseMessage){
+					if (((ResponseMessage) msg).isError()){
+						String error = "ERROR:" + ((ResponseMessage) msg).getErrorDescription();
+						mWindowInterface.printError(error);
+					}
+					else{
+						if (msg instanceof SWORDResponseMessage){
+							WordStats StatsPalabra = ((SWORDResponseMessage) msg).getWord();
+							
+							mWindowInterface.printSWORD(StatsPalabra);
+						}
+						if (msg instanceof SJOINResponseMessage) {
+							mesa = ((SJOINResponseMessage)msg).getTable();
+			
+							mWindowInterface.printSJOIN(mesa);
+						}
+						if (msg instanceof SLEAVEResponseMessage) {
+							mWindowInterface.printSLEAVE();
+						}
+						if (msg instanceof SNICKResponseMessage) {
+							String nick = ((SNICKResponseMessage)msg).getNick();
+			
+							mWindowInterface.printSNICK(nick);
+						}
+						if (msg instanceof SLISTResponseMessage) {
+							
+							mWindowInterface.printSLIST(((SLISTResponseMessage)msg).getTables());
+							
+						}
+						if (msg instanceof SSTARTResponseMessage){
+			
+							mWindowInterface.printSSTART();
+						}
+						if (msg instanceof SWHOResponseMessage) {
+							
+							mWindowInterface.printSWHO(((SWHOResponseMessage)msg).getNicks());
+						}
+					}
+				}		
+		}
+		
+	}
+
+
+public static interface OutputInterface {
+		
+		public void printASTART(Character[][] matriz);
+		
+		public void printAEND(ArrayList<PlayerStats> players);
+		
+		public void printAPLAYED(String nick, int length, boolean discoveredPlayed);
+		
+		public void printAJOIN(String nick_usuario);
+		
+		public void printANICK(String new_nick, String old_nick);
+		
+		public void printALEAVE(String nick_leave);
+		
+		public void printSWORD(WordStats StatsPalabra);
+		
+		public void printSJOIN(String table);
+		
+		public void printSLEAVE();
+		
+		public void printSNICK(String nick);
+		
+		public void printSLIST(ArrayList<TableStats> tables);
+		
+		public void printSSTART();
+		
+		public void printSWHO(String[] array_jugadores);
+		
+		public void printError(String error);
+		
+	}
+
+
+public void addListener(WindowInterface WI){
+	mWindowInterface = WI;
+}
+		
 	
 }
 
