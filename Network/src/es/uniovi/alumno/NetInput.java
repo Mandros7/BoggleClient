@@ -10,6 +10,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import es.uniovi.computadores.mensajes.Message;
+import es.uniovi.computadores.mensajes.NotificationMessage;
 
 class NetInput extends Thread {
 	// Hilo de entrada de datos desde la red
@@ -59,12 +60,15 @@ class NetInput extends Thread {
 				
 				JSONObject json = (JSONObject) JSONValue.parse(StringRed);
 				Message msg = Message.createFromJSON(json);
+				
+				if (msg instanceof NotificationMessage) {
+					Client.NoQuitPufBuf();
+				}
 				try {
 					InBuf.put(msg);
 				} catch (InterruptedException e) {
 					//e.printStackTrace();
 				}
-	
 				} catch (IOException e1) {
 					//e1.printStackTrace();
 				}
