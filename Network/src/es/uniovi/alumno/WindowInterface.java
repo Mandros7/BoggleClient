@@ -80,11 +80,10 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	private JButton btnStart;
 	
 
-	public WindowInterface(Client boggle, String nick){
+	public WindowInterface(Client boggle){
 		this.bc = boggle;
 		bc.addListener(this);
 		initialize();
-		bc.changeNick(nick);
 		this.frame.setVisible(true);
 	}
 	
