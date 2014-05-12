@@ -56,13 +56,14 @@ public class Client {
 		InBuff = new ArrayBlockingQueue<Message>(10);
 
 	    @SuppressWarnings("unused")
-		WindowInterface WI = new WindowInterface(this,nick);
+		WindowInterface WI = new WindowInterface(this);
 		netOutput = new NetOutput(socket,OutBuff);
 	    netInput = new NetInput(socket, InBuff);
 	    
 	    netOutput.start();
 	    netInput.start();
 	    
+	    changeNick(nick);
 		takeMessages();
 		
 		netOutput.close();
