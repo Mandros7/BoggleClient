@@ -3,7 +3,6 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-//import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import es.uniovi.computadores.mensajes.*;
@@ -44,6 +43,7 @@ public class Client {
 	static boolean astart_recibido = false;
 	final ArrayBlockingQueue<Message> InBuf;
 	final ArrayBlockingQueue<Message> OutBuf;
+	static ArrayBlockingQueue<String> QuitBuf = new ArrayBlockingQueue<String>(10);
 	static MessageBuilder mb = new MessageBuilder();
 	
 	public Client(ArrayBlockingQueue<Message> InBuf, ArrayBlockingQueue<Message> OutBuf){
@@ -77,8 +77,7 @@ public class Client {
 	    salidaRed.start();
 	    entradaRed.start();
 	    
-	    NICKCommandMessage nick_inicial = new NICKCommandMessage(nick);
-	    OutBuff.put(nick_inicial);
+	    BC.changeNick(nick);
 	    
 	    while(en_ejecucion){
 	    
@@ -86,9 +85,42 @@ public class Client {
 	    socket.close();
 	}
 	
+	public void quitGame() {
+		QuitPutBuf();
+	}
+	
+	public void QuitPutBuf() {
+		try {
+			QuitBuf.put("quit");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void NoQuitPufBuf() {
+		try {
+			QuitBuf.put("NoQuit");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public boolean CheckIfQuit() {
+		String end = null;
+		try {
+			end = QuitBuf.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if (end.equals("quit")) {
+			return true;
+		}
+		return false;
+	}
 	
 	public void start() {
 		try {
+			NoQuitPufBuf();
 			OutBuf.put(mb.CreateStartCommand());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -97,6 +129,7 @@ public class Client {
 	
 	public void joinTable(String mesa) {
 		try {
+			NoQuitPufBuf();
 			OutBuf.put(mb.CreateJoinCommand(mesa));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -105,6 +138,7 @@ public class Client {
 	
 	public void changeNick(String nick) {
 		try {
+			NoQuitPufBuf();
 			OutBuf.put(mb.CreateNickCommand(nick));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -113,6 +147,7 @@ public class Client {
 	
 	public void leaveTable() {
 		try {
+			NoQuitPufBuf();
 			OutBuf.put(mb.CreateLeaveCommand());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -121,6 +156,7 @@ public class Client {
 	
 	public void listTables() {
 		try {
+			NoQuitPufBuf();
 			OutBuf.put(mb.CreateListCommand());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -129,6 +165,7 @@ public class Client {
 	
 	public void listTablePlayers() {
 		try {
+			NoQuitPufBuf();
 			OutBuf.put(mb.CreateWhoCommand());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -137,6 +174,7 @@ public class Client {
 	
 	public void wordFound(WordStats word) {
 		try {
+			NoQuitPufBuf();
 			OutBuf.put(mb.CreateWordCommand(word));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
