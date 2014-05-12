@@ -93,12 +93,17 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 							
 							while (Client.en_ejecucion){
 								
+								if (bc.CheckIfQuit()) {
+									Client.en_ejecucion = false;
+								}
+								else {
 									try {
 										Message msg = bc.InBuf.take();
 										window.CheckIfASTART(msg);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
+								}
 							}
 						}
 					};
@@ -707,8 +712,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	          		bc.listTablePlayers();
 	              	break;
 	         	case ("/QUIT"):
-	         		Client.en_ejecucion = false;
-	         	
+	         		bc.quitGame();
 	          		break;
 	         	case ("/WORD"):
 	         		if (datos.length>1){
