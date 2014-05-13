@@ -24,9 +24,9 @@ public class FrameNick extends JFrame {
 	private JTextField textField;
 	private JFrame mainJFrame;
 	
-	private void close(){
+	private int close(){
 		mainJFrame.setEnabled(true);
-		this.dispose();
+		return FrameNick.DISPOSE_ON_CLOSE;
 	}
 	
 	
@@ -35,7 +35,7 @@ public class FrameNick extends JFrame {
 	 */
 	public FrameNick(final Client bc, JFrame frame) {
 		this.mainJFrame = frame;
-		setDefaultCloseOperation(FrameNick.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(close());
 		setBounds(100, 100, 444, 65);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
