@@ -26,6 +26,7 @@ public class FrameNick extends JFrame {
 	
 	private int close(){
 		mainJFrame.setEnabled(true);
+		this.dispose();
 		return FrameNick.DISPOSE_ON_CLOSE;
 	}
 	
