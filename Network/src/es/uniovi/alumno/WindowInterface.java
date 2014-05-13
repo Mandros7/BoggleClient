@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -19,6 +18,10 @@ import javax.swing.text.DefaultCaret;
 
 import es.uniovi.computadores.mensajes.*;
 import es.uniovi.alumno.Client;
+
+
+
+
 
 
 
@@ -55,9 +58,6 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	private JTextField commandInputField;
 	private JTextArea textMessages;
 	private JPanel panel;
-	private JLabel TableLabel;
-	private JLabel NickLabel;
-	private JPanel NickPanel;
 	private JPanel matrixPanel;
 	private JButton oneOne;
 	private JButton oneTwo;
@@ -78,6 +78,9 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	private JButton[][] butonlar;
 	private Client bc;
 	private JButton btnStart;
+	private JButton btnNick;
+	private JButton btnTable;
+
 	
 
 	public WindowInterface(Client boggle){
@@ -104,7 +107,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			frame = new JFrame();
 			BorderLayout borderLayout = (BorderLayout) frame.getContentPane().getLayout();
 			borderLayout.setVgap(5);
-			frame.setBounds(100, 100, 648, 300);
+			frame.setBounds(100, 100, 708, 341);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			
 			JScrollPane scrollPane = new JScrollPane();
@@ -153,16 +156,20 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			panel = new JPanel();
 			southPanel.add(panel, BorderLayout.WEST);
 			
-			TableLabel = new JLabel();
-			TableLabel.setText("Ninguna");
-			panel.add(TableLabel);
+			btnTable = new JButton("Ninguna");
+			panel.add(btnTable);
 			
-			NickPanel = new JPanel();
-			panel.add(NickPanel);
-			
-			NickLabel = new JLabel();
-			NickPanel.add(NickLabel);
-			NickLabel.setText("Ninguno");
+			btnNick = new JButton("Ninguno");
+			btnNick.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					frame.setEnabled(false);
+					FrameNick nick = new FrameNick(bc,frame);
+					nick.setVisible(true);
+					nick.setAlwaysOnTop(true);
+					nick.setResizable(false);
+				}
+			});
+			panel.add(btnNick);
 			
 			matrixPanel = new JPanel();
 			frame.getContentPane().add(matrixPanel, BorderLayout.EAST);
@@ -438,8 +445,6 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 						gbc_btnStart.gridx = 2;
 						gbc_btnStart.gridy = 5;
 						matrixPanel.add(btnStart, gbc_btnStart);
-						
-			
 		
 	}
 
@@ -489,6 +494,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 		String txtAEND = "La partida ha terminado.\n";
 		cleanMatrix();
 		btnStart.setEnabled(true);
+		btnNick.setEnabled(true);
 		while (i<players.size()) {
 			txtAEND = txtAEND + "El jugador " +
 					players.get(i).getNick() +
@@ -538,20 +544,20 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	public void printSJOIN(String table) {
 		btnStart.setEnabled(true);
 		String txtSJOIN = "Te has unido a la mesa " + table;
-		TableLabel.setText(table);
+		btnTable.setText(table);
 		textMessages.append(txtSJOIN+"\n");;
 	}
 	
 	public void printSLEAVE() {
 		String txtSLEAVE = "Has abadonado la mesa.";
 		btnStart.setEnabled(false);
-		Client.setTABLE("Ninguna");
+		btnTable.setText("Ninguna");
 		textMessages.append(txtSLEAVE+"\n");
 	}
 	
 	public void printSNICK(String nick) {
 		String txtSNICK = "Tu nuevo nick es: " + nick;
-		NickLabel.setText(nick);
+		btnNick.setText(nick);
 		textMessages.append(txtSNICK+"\n");
 	}
 	
@@ -585,6 +591,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	public void printSSTART() {
 		String txtSSTART = "Esperando al resto de jugadores...";
 		btnStart.setEnabled(false);
+		btnNick.setEnabled(false);
 		textMessages.append(txtSSTART+"\n");
 	}
 	
@@ -629,6 +636,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	}
 
 }
+
 
 
 
