@@ -31,6 +31,10 @@ import es.uniovi.alumno.Client;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import javax.swing.SwingConstants;
+import javax.swing.JLabel;
+import javax.swing.border.LineBorder;
+import java.awt.Color;
 
 public class WindowInterface extends JFrame implements Client.OutputInterface {
 	
@@ -79,10 +83,11 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	private Client bc;
 	private JButton btnStart;
 	private JButton btnNick;
-	private JButton btnTable;
 	private JPanel righPanel;
 	private JPanel bottomPanel;
 	private JButton btnAyuda;
+	private JLabel labelNick;
+	private JLabel labelTable;
 
 	
 
@@ -110,8 +115,12 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			frame = new JFrame();
 			BorderLayout borderLayout = (BorderLayout) frame.getContentPane().getLayout();
 			borderLayout.setVgap(5);
-			frame.setBounds(100, 100, 708, 337);
+			frame.setBounds(100, 100, 756, 345);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+			labelTable = new JLabel("Mesa actual: Ninguna");
+			labelTable.setHorizontalAlignment(SwingConstants.CENTER);
+			frame.getContentPane().add(labelTable, BorderLayout.NORTH);
 			
 			JScrollPane scrollPane = new JScrollPane();
 			scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -159,21 +168,8 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			panel = new JPanel();
 			southPanel.add(panel, BorderLayout.WEST);
 			
-			btnTable = new JButton("Ninguna");
-			panel.add(btnTable);
-			btnTable.setEnabled(false);
-			
-			btnNick = new JButton("Ninguno");
-			btnNick.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					frame.setEnabled(false);
-					FrameNick nick = new FrameNick(bc,frame);
-					nick.setVisible(true);
-					nick.setAlwaysOnTop(true);
-					nick.setResizable(false);
-				}
-			});
-			panel.add(btnNick);
+			labelNick = new JLabel("NICK: Ninguno");
+			panel.add(labelNick);
 			
 			butonlar= new JButton[4][4];
 						
@@ -182,6 +178,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 						righPanel.setLayout(new BorderLayout(0, 0));
 						
 						matrixPanel = new JPanel();
+						matrixPanel.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
 						righPanel.add(matrixPanel);
 						GridBagLayout gbl_matrixPanel = new GridBagLayout();
 						gbl_matrixPanel.columnWidths = new int[] {30, 75, 75, 75, 75, 30};
@@ -458,10 +455,23 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 															righPanel.add(bottomPanel, BorderLayout.SOUTH);
 															
 															btnAyuda = new JButton("Ayuda");
+															btnAyuda.setHorizontalAlignment(SwingConstants.RIGHT);
 															btnAyuda.addActionListener(new ActionListener() {
 																public void actionPerformed(ActionEvent e) {
 																	FrameHelp help = new FrameHelp();
 																	help.setVisible(true);
+																}
+															});
+															
+															btnNick = new JButton("Cambiar Nick");
+															bottomPanel.add(btnNick);
+															btnNick.addActionListener(new ActionListener() {
+																public void actionPerformed(ActionEvent e) {
+																	frame.setEnabled(false);
+																	FrameNick nick = new FrameNick(bc,frame);
+																	nick.setVisible(true);
+																	nick.setAlwaysOnTop(true);
+																	nick.setResizable(false);
 																}
 															});
 															bottomPanel.add(btnAyuda);
@@ -564,20 +574,20 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	public void printSJOIN(String table) {
 		btnStart.setEnabled(true);
 		String txtSJOIN = "Te has unido a la mesa " + table;
-		btnTable.setText(table);
+		labelTable.setText("Mesa actual: "+table);
 		textMessages.append(txtSJOIN+"\n");;
 	}
 	
 	public void printSLEAVE() {
 		String txtSLEAVE = "Has abadonado la mesa.";
 		btnStart.setEnabled(false);
-		btnTable.setText("Ninguna");
+		labelTable.setText("Mesa actual: Ninguna");
 		textMessages.append(txtSLEAVE+"\n");
 	}
 	
 	public void printSNICK(String nick) {
 		String txtSNICK = "Tu nuevo nick es: " + nick;
-		btnNick.setText(nick);
+		labelNick.setText("NICK: "+nick);
 		textMessages.append(txtSNICK+"\n");
 	}
 	
