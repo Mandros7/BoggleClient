@@ -15,6 +15,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JTextArea;
 
@@ -35,21 +37,32 @@ public class FrameTable extends JFrame {
 	private JFrame mainJFrame;
 	public JTextArea txtTables;
 	
-	/*
-	 * Esta funcion devuelve el control a la ventana principal y cierra la ventana de unirse a una mesa
-	 */
-	private int close(){
+	
+	public void close(){
 		mainJFrame.setEnabled(true);
 		this.dispose();
-		return FrameTable.DISPOSE_ON_CLOSE;
 	}
-
+	
 	/**
 	 * Create the frame.
 	 */
 	public FrameTable(final Client bc, JFrame frame) {
+		
+		
+		/*
+		 * Esta funcion devuelve el control a la ventana principal y cierra la ventana de unirse a una mesa
+		 */
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				mainJFrame.setEnabled(true);
+			}
+		});
+		
+		
 		this.mainJFrame = frame;
-		setDefaultCloseOperation(close());
+		mainJFrame.setEnabled(false); // Quitamos el control a la ventana principal
+		setDefaultCloseOperation(FrameTable.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));

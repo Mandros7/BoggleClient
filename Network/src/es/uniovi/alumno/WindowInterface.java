@@ -494,8 +494,9 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 																*/
 																public void actionPerformed(ActionEvent e) {
 																	if (btnJoin.getText()=="Unirse a mesa"){
-																		frame.setEnabled(false); //Desactiva el frame principal
 																		joinTable = new FrameTable(bc,frame);
+																		joinTable.setAlwaysOnTop(true);
+																		joinTable.setAutoRequestFocus(true);
 																		joinTable.setVisible(true);
 																	}
 																	if (btnJoin.getText()=="Jugadores"){
@@ -513,7 +514,6 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 															bottomPanel.add(btnNick);
 															btnNick.addActionListener(new ActionListener() {
 																public void actionPerformed(ActionEvent e) {
-																	frame.setEnabled(false); //Desactiva el frame principal
 																	FrameNick nick = new FrameNick(bc,frame);
 																	nick.setVisible(true);
 																	nick.setAlwaysOnTop(true);

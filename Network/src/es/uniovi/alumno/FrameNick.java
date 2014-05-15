@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -33,10 +35,9 @@ public class FrameNick extends JFrame {
 	/*
 	 * Esta funcion devuelve el control a la ventana principal y cierra la ventana de nick
 	 */
-	private int close(){
+	private void close(){
 		mainJFrame.setEnabled(true);
 		this.dispose();
-		return FrameNick.DISPOSE_ON_CLOSE;
 	}
 	
 	
@@ -44,8 +45,20 @@ public class FrameNick extends JFrame {
 	 * Create the frame.
 	 */
 	public FrameNick(final Client bc, JFrame frame) {
+		
+		/*
+		 * Esta funcion devuelve el control a la ventana principal y cierra la ventana de nick
+		 */
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				mainJFrame.setEnabled(true);
+			}
+		});
+		
+		
 		this.mainJFrame = frame;
-		setDefaultCloseOperation(close());
+		mainJFrame.setEnabled(false);
 		setBounds(100, 100, 444, 65);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
