@@ -41,15 +41,19 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	
 	/*
 	 * Esta interfaz tiene botones en una matriz sobre los que se puede actuar al 
-	 * iniciar la partida. Al hacer clic sobre ellos se a������aden a la linea de comandos 
+	 * iniciar la partida. Al hacer clic sobre ellos se incorporan a la linea de comandos 
 	 * para enviar una palabra. 
 	 * El contenido de los botones se actualiza al recibir la confirmacion de inicio de juego
 	 * 
 	 * Tambien dispone de un boton de START que solo se puede pulsar cuando se esta dentro de 
 	 * una mesa y no se ha iniciado el juego
 	 * 
-	 * Hay dos etiquetas a la izquierda de la linea de comandos que indican
-	 * <MESA ACTUAL>  y <NICK ACTUAL>
+	 * Hay dos etiquetas a la izquierda de la linea de comandos y arriba del todo que indican
+	 * <NICK ACTUAL> y <MESA ACTUAL>
+	 * 
+	 * Tambien hay un boton de ayuda, uno para unirse a una mesa y otro para abandonarla.
+	 * El boton de unirse a la mesa cambia su funcionalidad a "Jugadores", enviando un
+	 * comando WHO.
 	 * 
 	 */
 
@@ -88,12 +92,15 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	private JButton btnAyuda;
 	private JLabel labelNick;
 	private JLabel labelTable;
+	private JButton btnJoin;
+	private JButton btnLeave;
+	private FrameTable joinTable;
 
 	
 
 	public WindowInterface(Client boggle){
-		this.bc = boggle;
-		bc.addListener(this);
+		this.bc = boggle;     // Permitimos a la interfaz acceder a los metodos de procesado del cliente
+		bc.addListener(this); //Permitimos al cliente acceder a los metodos de la interfaz.
 		initialize();
 		this.frame.setVisible(true);
 	}
@@ -115,7 +122,7 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 			frame = new JFrame();
 			BorderLayout borderLayout = (BorderLayout) frame.getContentPane().getLayout();
 			borderLayout.setVgap(5);
-			frame.setBounds(100, 100, 756, 345);
+			frame.setBounds(100, 100, 874, 485);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			
 			labelTable = new JLabel("Mesa actual: Ninguna");
@@ -186,6 +193,12 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 						gbl_matrixPanel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0};
 						gbl_matrixPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0};
 						matrixPanel.setLayout(gbl_matrixPanel);
+						
+						/*
+						 * Botones de la matriz, con nombre filaColumna
+						 * Se les permite copiar su contenido a la linea de comandos
+						 * cuando se accionan
+						 */
 						
 						
 						oneOne = new JButton(" ");
@@ -454,6 +467,9 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 															bottomPanel = new JPanel();
 															righPanel.add(bottomPanel, BorderLayout.SOUTH);
 															
+															/*
+															 * Boton de ayuda, lanza un objeto de la clase Frame
+															 */
 															btnAyuda = new JButton("Ayuda");
 															btnAyuda.setHorizontalAlignment(SwingConstants.RIGHT);
 															btnAyuda.addActionListener(new ActionListener() {
@@ -463,11 +479,41 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 																}
 															});
 															
+															btnLeave = new JButton("Abandonar mesa");
+															btnLeave.setEnabled(false);
+															btnLeave.addActionListener(new ActionListener() {
+																public void actionPerformed(ActionEvent e) {
+																	bc.leaveTable();
+																}
+															});
+															bottomPanel.add(btnLeave);
+															btnJoin = new JButton("Unirse a mesa");
+															btnJoin.addActionListener(new ActionListener() {
+																/* El boton se comportara de forma distinta segun su contenido,
+																* Que cambiara al recibir mensajes del tipo SJOIN o SLEAVE
+																*/
+																public void actionPerformed(ActionEvent e) {
+																	if (btnJoin.getText()=="Unirse a mesa"){
+																		frame.setEnabled(false); //Desactiva el frame principal
+																		joinTable = new FrameTable(bc,frame);
+																		joinTable.setVisible(true);
+																	}
+																	if (btnJoin.getText()=="Jugadores"){
+																		bc.listTablePlayers();
+																	}
+						
+																}
+															});
+															bottomPanel.add(btnJoin);													
+															
+															/*
+															 * Lanza un objeto de la clase FrameNick
+															 */
 															btnNick = new JButton("Cambiar Nick");
 															bottomPanel.add(btnNick);
 															btnNick.addActionListener(new ActionListener() {
 																public void actionPerformed(ActionEvent e) {
-																	frame.setEnabled(false);
+																	frame.setEnabled(false); //Desactiva el frame principal
 																	FrameNick nick = new FrameNick(bc,frame);
 																	nick.setVisible(true);
 																	nick.setAlwaysOnTop(true);
@@ -477,6 +523,12 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 															bottomPanel.add(btnAyuda);
 		
 	}
+		
+	/*
+	 * Funciones de manejo de la matriz de botones, definida en butonlar[][]
+	 * El tamaño de la matriz podria cambiarse a 5x5 y no activar nunca los botones 
+	 * de una fila y una columna, sin necesidad de modificar demasiado codigo
+	 */
 
 	private void refreshMatrix() {
 		Character[][] matrix = Client.getMATRIX();
@@ -492,6 +544,8 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 		for (int i = 0; i < butonlar.length; i++) {
 			for (int j = 0; j < butonlar[i].length; j++) {
 				butonlar[i][j].setText(" ");
+				// La siguiente instruccion evita que los botones cambien de tamaño segun su contenido
+				butonlar[i][j].setPreferredSize(butonlar[i][j].getSize()); 
 				butonlar[i][j].setEnabled(false);
 			}
 			
@@ -499,7 +553,11 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 		
 	}
 
-	public void printASTART(Character[][] matriz) {
+	/*
+	 * Comandos implementados en la interfaz
+	 */
+	
+	public void printASTART(Character[][] matriz, int duration) {
 		
 		String txtASTART = "Se ha iniciado la partida" + "\n" + "------------" + "\n";
 		Client.setMATRIX(matriz);
@@ -516,20 +574,33 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 		txtASTART = txtASTART + "------------";
 		Client.astart_recibido = true;
 		refreshMatrix();
-		textMessages.append(txtASTART+"\n");
+		textMessages.append("\nSe ha iniciado la partida.\nHay "+duration+" segundos para introducir palabras.\nQue gane el mejor!\n\n");
+		// textMessages.append(txtASTART+"\n");
 	}
 
 	public void printAEND(ArrayList<PlayerStats> players) {
 		int i = 0;
-		String txtAEND = "La partida ha terminado.\n";
+		String txtAEND = "La partida ha terminado.\n\n";
 		cleanMatrix();
 		btnStart.setEnabled(true);
 		btnNick.setEnabled(true);
 		while (i<players.size()) {
+			ArrayList <WordStats> words = players.get(i).getWords();
+			String wordsFound = "";
+			for (int j = 0; j < words.size(); j++) {
+				if (j<words.size()-1){
+					wordsFound = wordsFound+words.get(j).getWord()+", ";
+				}
+				else {
+					wordsFound = wordsFound+words.get(j).getWord();
+				}
+			}
+			
 			txtAEND = txtAEND + "El jugador " +
 					players.get(i).getNick() +
 						" ha obtenido una puntuacion de " +
-						players.get(i).getScore() + " punto(s)\n";
+						players.get(i).getScore() + " punto(s)\n al encontrar la(s) palabra(s) "
+						+ wordsFound;
 			i++;
 		}
 		textMessages.append(txtAEND+"\n");
@@ -557,6 +628,8 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 		textMessages.append(txtALEAVE+"\n");
 	}
 	
+	// Algunos de los mensajes de confirmacion tambien activan y desactivan botones
+	
 	public void printSWORD(WordStats StatsPalabra) {
 		String txtSWORD;
 		String word = StatsPalabra.getWord();
@@ -573,6 +646,10 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	
 	public void printSJOIN(String table) {
 		btnStart.setEnabled(true);
+		btnLeave.setEnabled(true);
+		// La siguiente instruccion evita que los botones cambien de tamaño segun su contenido
+		btnJoin.setPreferredSize(btnJoin.getSize());
+		btnJoin.setText("Jugadores");
 		String txtSJOIN = "Te has unido a la mesa " + table;
 		labelTable.setText("Mesa actual: "+table);
 		textMessages.append(txtSJOIN+"\n");;
@@ -581,6 +658,8 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	public void printSLEAVE() {
 		String txtSLEAVE = "Has abadonado la mesa.";
 		btnStart.setEnabled(false);
+		btnLeave.setEnabled(false);
+		btnJoin.setText("Unirse a mesa");
 		labelTable.setText("Mesa actual: Ninguna");
 		textMessages.append(txtSLEAVE+"\n");
 	}
@@ -595,9 +674,9 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 		String txtSLIST = "";
 		String anadido;
 		int tam = tables.size();
-		
 		if (tam==0) {
-			txtSLIST = "No hay ningun jugador en ninguna mesa";
+			txtSLIST = "No hay ningun jugador en ninguna mesa"
+					+ "\nCrea una mesa nueva introduciendo el nombre mas abajo.";
 		}
 		else {
 			for (int i=0; i<tam; i++) {
@@ -607,15 +686,20 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 							tables.get(i).getPlayerCount() +
 								" jugador(es)";
 				if (tables.get(i).getAlreadyPlaying()) {
-					anadido = " y la partida ya se ha iniciado.";
+					anadido = " y la partida ya se ha iniciado.\n";
 				}
 				else {
-					anadido = " y la partida aun no se ha iniciado";
+					anadido = " y la partida aun no se ha iniciado\n";
 				}
-				txtSLIST = info_tables + anadido;
+				txtSLIST = txtSLIST + info_tables + anadido;
 			}
 		}
-		textMessages.append(txtSLIST+"\n");
+		//textMessages.append(txtSLIST+"\n");
+		// Si existe una ventana creada para imprimir las mesas actuales, se muestra en ella.
+		if (joinTable!=null){
+			joinTable.txtTables.setText("");
+			joinTable.txtTables.append(txtSLIST);
+		}
 	}
 	
 	public void printSSTART() {

@@ -11,6 +11,11 @@ import javax.swing.ScrollPaneConstants;
 
 public class FrameHelp extends JFrame {
 
+	/*
+	 * Ventana de ayuda que aparecera al accionar el boton de "Ayuda" del Frame Principal
+	 * Permite manejar ambas ventanas a la vez
+	 */
+	
 	/**
 	 * 
 	 */
