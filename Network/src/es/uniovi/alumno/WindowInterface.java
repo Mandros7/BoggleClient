@@ -27,14 +27,19 @@ import es.uniovi.alumno.Client;
 
 
 
+
 //import com.jgoodies.forms.layout.FormLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+
 import javax.swing.SwingConstants;
 import javax.swing.JLabel;
 import javax.swing.border.LineBorder;
+
 import java.awt.Color;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class WindowInterface extends JFrame implements Client.OutputInterface {
 	
@@ -120,10 +125,15 @@ public class WindowInterface extends JFrame implements Client.OutputInterface {
 	 */
 		private void initialize() {
 			frame = new JFrame();
+			frame.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					bc.quitGame();
+				}
+			});
 			BorderLayout borderLayout = (BorderLayout) frame.getContentPane().getLayout();
 			borderLayout.setVgap(5);
 			frame.setBounds(100, 100, 874, 485);
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			
 			labelTable = new JLabel("Mesa actual: Ninguna");
 			labelTable.setHorizontalAlignment(SwingConstants.CENTER);
