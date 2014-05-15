@@ -58,7 +58,7 @@ public class Client {
 	    @SuppressWarnings("unused")
 		WindowInterface WI = new WindowInterface(this);
 		netOutput = new NetOutput(socket,OutBuff);
-	    netInput = new NetInput(socket, InBuff);
+	    netInput = new NetInput(socket, InBuff,this);
 	    
 	    netOutput.start();
 	    netInput.start();
@@ -132,6 +132,10 @@ public class Client {
 			return true;
 		}
 		return false;
+	}
+	
+	public void lostConnection(){
+		mWindowInterface.printError("\nERROR: Se perdió la conexión con el Servidor\nIntroduzca el comando /QUIT o cierre esta ventana");
 	}
 	
 	/*

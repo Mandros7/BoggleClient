@@ -19,14 +19,16 @@ class NetInput extends Thread {
 	String StringRed = "";
 	ArrayBlockingQueue<Message> InBuf;
 	volatile boolean en_ejecucion = true;
+	Client bc;
 
 	public void close() throws IOException{
 		this.interrupt();
 	}
 	
-	NetInput(Socket n, ArrayBlockingQueue<Message> abq){
+	NetInput(Socket n, ArrayBlockingQueue<Message> abq, Client bc){
 		this.socket = n;
 		this.InBuf = abq;
+		this.bc = bc;
 	}
 	
 	public void run(){
@@ -59,14 +61,18 @@ class NetInput extends Thread {
 				}
 				
 				JSONObject json = (JSONObject) JSONValue.parse(StringRed);
-				Message msg = Message.createFromJSON(json);
-				
-				if (msg instanceof NotificationMessage) {
-					Client.NoQuitPufBuf();
-				}
-				try {
+				try{
+					Message msg = Message.createFromJSON(json);
+					if (msg instanceof NotificationMessage) {
+						Client.NoQuitPufBuf();
+					}
 					InBuf.put(msg);
-				} catch (InterruptedException e) {
+				} catch (NullPointerException e){
+					//System.out.println("ERROR: Se perdio la conexion con el servidor");
+					bc.lostConnection();
+					break;
+				}
+				catch (InterruptedException e) {
 					//e.printStackTrace();
 				}
 				} catch (IOException e1) {
