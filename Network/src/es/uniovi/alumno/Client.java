@@ -64,6 +64,10 @@ public class Client {
 	    netInput.start();
 	    
 	    changeNick(nick);
+	    
+	    /* Con takeMessages se entra en un bucle del que se saldra al enviar un mensaje Quit o cerrar la ventana 
+	    * de la interfaz. Mas adelante se cerraran los hilos de la conexion y la ventana en caso de que se mandase un mensaje QUIT
+	    */
 		takeMessages();
 		
 		netOutput.close();
@@ -75,7 +79,7 @@ public class Client {
 	}
 	
 
-	
+	// Funcion que coge mensajes del buffer de entrada
 	public void takeMessages(){
 		while (Client.en_ejecucion){
 					
@@ -92,6 +96,10 @@ public class Client {
 					}
 				}
 	}
+	
+	/* Metodo implementado para reconocer si se ha enviado un mensaje QUIT mediante el uso de un buffer bloqueante
+	 * auxiliar que se comprueba cada vez que se ejecuta "CheckIfQuit"
+	 */
 	
 	public void quitGame() {
 		QuitPutBuf();
@@ -126,6 +134,11 @@ public class Client {
 		return false;
 	}
 	
+	/*
+	 * Diferentes funciones para generar comandos de las que dispone el cliente. La interfaz podra acceder a ellos 
+	 * al instanciarse un objeto Client dentro de ésta.
+	 */
+	
 	protected void start() {
 		try {
 			NoQuitPufBuf();
@@ -135,7 +148,7 @@ public class Client {
 		}
 	}
 	
-	private void joinTable(String mesa) {
+	protected void joinTable(String mesa) {
 		try {
 			NoQuitPufBuf();
 			OutBuff.put(mb.CreateJoinCommand(mesa));
@@ -153,7 +166,7 @@ public class Client {
 		}
 	}
 	
-	private void leaveTable() {
+	protected void leaveTable() {
 		try {
 			NoQuitPufBuf();
 			OutBuff.put(mb.CreateLeaveCommand());
@@ -162,7 +175,7 @@ public class Client {
 		}
 	}
 	
-	private void listTables() {
+	protected void listTables() {
 		try {
 			NoQuitPufBuf();
 			OutBuff.put(mb.CreateListCommand());
@@ -171,7 +184,7 @@ public class Client {
 		}
 	}
 	
-	private void listTablePlayers() {
+	protected void listTablePlayers() {
 		try {
 			NoQuitPufBuf();
 			OutBuff.put(mb.CreateWhoCommand());
@@ -195,6 +208,10 @@ public class Client {
 		texto = texto.replaceAll(" +", " ").trim();
 		return texto;
 	}
+	
+	/*
+	 * Funcion para reconocer un comando a partir de una linea introducida
+	 */
 	
 	public void sendCommand(String[] datos) {
 		String[] comandos = {"start","join","nick","leave","word","list","who","quit"};
@@ -286,12 +303,18 @@ public class Client {
 		}
 	}
 	
+	
+	/*
+	 * Funcion para clasificar un mensaje extraido mediante la funcion takeMessages
+	 * Una vez decidido se solicita una accion correspondiente a la interfaz (que se asigno mediante la funcion
+	 * addListener)
+	 */
 private void checkResponse(Message msg) {
 			String mesa = Client.getTABLE();
 			if (mWindowInterface!=null){
 				if (msg instanceof NotificationMessage) {
 					if (msg instanceof ASTARTNotificationMessage){
-						mWindowInterface.printASTART(((ASTARTNotificationMessage)msg).getMatrix());
+						mWindowInterface.printASTART(((ASTARTNotificationMessage)msg).getMatrix(),((ASTARTNotificationMessage) msg).getDurationSecs());
 					}
 					if (msg instanceof APLAYEDNotificationMessage){
 						String nick = ((APLAYEDNotificationMessage) msg).getNick();
@@ -364,10 +387,14 @@ private void checkResponse(Message msg) {
 		
 	}
 
+	/*
+	 * Se definen los metodos de los que constara una interfaz de salida dada. Las interfaces implementaran 
+	 * este codigo.
+	 */
 
 public static interface OutputInterface {
 		
-		public void printASTART(Character[][] matriz);
+		public void printASTART(Character[][] matriz,int duration);
 		
 		public void printAEND(ArrayList<PlayerStats> players);
 		
@@ -397,6 +424,11 @@ public static interface OutputInterface {
 		
 	}
 
+
+/* 
+ * Funcion para asignar una interfaz al cliente y que este pueda llamar a metodos de la interfaz 
+ * para imprimir resultados y respuestas
+ */
 
 public void addListener(WindowInterface WI){
 	mWindowInterface = WI;

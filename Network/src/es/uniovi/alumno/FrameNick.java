@@ -14,6 +14,12 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 public class FrameNick extends JFrame {
+	
+	/*
+	 * Ventana de asignacion de Nick. Pide que se introduza el nuevo nick y se cierra al pulsar OK o 
+	 * Enter, siempre y cuando el nick no sea una cadena vacia. 
+	 * Esta ventana obtiene el control y bloquea la ventana principal.
+	 */
 
 	/**
 	 * 
@@ -24,6 +30,9 @@ public class FrameNick extends JFrame {
 	private JTextField textField;
 	private JFrame mainJFrame;
 	
+	/*
+	 * Esta funcion devuelve el control a la ventana principal y cierra la ventana de nick
+	 */
 	private int close(){
 		mainJFrame.setEnabled(true);
 		this.dispose();
