@@ -21,4 +21,5 @@ a GUI developed using SWING and AWT resources.
 Authors
 -----------
 Hector Rodriguez Campo
+
 Marco Martinez Avila
